@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -21,17 +21,17 @@ my $GIT = 'git';
 
 sub _opt {
   my $name = shift;
+  $name =~ tr/_/-/;
   return length($name) == 1 
     ? "-$name"
     : "--$name"
   ;
 }
 
-sub AUTOLOAD {
+sub _cmd {
   my $self = shift;
-  (my $meth = our $AUTOLOAD) =~ s/.+:://;
-  return if $meth eq 'DESTROY';
-  $meth =~ tr/_/-/;
+
+  my $cmd = shift;
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
 
@@ -43,7 +43,7 @@ sub AUTOLOAD {
     next if $val eq '0';
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
-  push @cmd, $meth;
+  push @cmd, $cmd;
   for my $name (keys %$opt) {
     my $val = delete $opt->{$name};
     next if $val eq '0';
@@ -78,6 +78,45 @@ sub AUTOLOAD {
   return @out;
 }
 
+sub AUTOLOAD {
+  my $self = shift;
+  (my $meth = our $AUTOLOAD) =~ s/.+:://;
+  return if $meth eq 'DESTROY';
+  $meth =~ tr/_/-/;
+
+  return $self->_cmd($meth, @_);
+}
+
+sub log {
+  my $self = shift;
+  my $opt  = ref $_[0] eq 'HASH' ? shift : {};
+  $opt->{no_color} = 1;
+  my @out = $self->_cmd(log => $opt, @_);
+
+  my @logs;
+  while (@out) {
+    local $_ = shift @out;
+    die "unhandled: $_" unless /^commit (\S+)/;
+    my $current = Git::Wrapper::Log->new($1);
+    $_ = shift @out;
+
+    while (/^(\S+):\s+(.+)$/) {
+      $current->attr->{lc $1} = $2;
+      $_ = shift @out;
+    }
+    die "no blank line separating head from message" if $_;
+    my $message = '';
+    while (@out and length($_ = shift @out)) {
+      s/^\s+//;
+      $message .= "$_\n";
+    }
+    $current->message($message);
+    push @logs, $current;
+  }
+
+  return @logs;
+}
+
 package Git::Wrapper::Exception;
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -91,6 +130,27 @@ sub output { join "", map { "$_\n" } @{ shift->{output} } }
 sub error  { join "", map { "$_\n" } @{ shift->{error} } } 
 sub status { shift->{status} }
 
+package Git::Wrapper::Log;
+
+sub new { 
+  my ($class, $id, %arg) = @_;
+  return bless {
+    id => $id,
+    attr => {},
+    %arg,
+  } => $class;
+}
+
+sub id { shift->{id} }
+
+sub attr { shift->{attr} }
+
+sub message { @_ > 1 ? ($_[0]->{message} = $_[1]) : $_[0]->{message} }
+
+sub date { shift->attr->{date} }
+
+sub author { shift->attr->{author} }
+
 1;
 __END__
 
@@ -100,14 +160,14 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.003
+  Version 0.004
 
 =head1 SYNOPSIS
 
   my $git = Git::Wrapper->new('/var/foo');
 
   $git->commit(...)
-  print for $git->log;
+  print $_->message for $git->log;
 
 =head1 DESCRIPTION
 
@@ -159,6 +219,32 @@ The exception stringifies to the error message.
 =head2 dir
 
   print $git->dir; # /var/foo
+
+=head2 log
+
+  my @logs = $git->log;
+
+Instead of giving back an arrayref of lines, the C<log> method returns a list
+of C<Git::Wrapper::Log> objects.  They have four methods:
+
+=over
+
+=item * id
+
+=item * author
+
+=item * date
+
+=item * message
+
+=back
+
+=head1 SEE ALSO
+
+L<VCI::VCS::Git> is the git implementation for L<VCI>, a generic interface to
+version-controle systems.
+
+Git itself is at L<http://git.or.cz>.
 
 =head1 AUTHOR
 
