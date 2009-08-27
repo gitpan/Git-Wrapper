@@ -41,7 +41,7 @@ like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
   
 eval { $git->a_command_not_likely_to_exist };
 ok(my $e = $@, "got an error");
-if ($git->version ge '1.6') {
+if ($git->version lt '1.6') {
   like($e, qr/which does not exist/);
 } else {
   like($e, qr/is not a git-command/);

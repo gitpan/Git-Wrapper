@@ -3,9 +3,12 @@ abstract: 'wrap git(7) command-line interface'
 author:
   - 'Hans Dieter Pearcey <hdp@cpan.org>'
 build_requires:
+  ExtUtils::MakeMaker: 6.42
   Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.91'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -19,4 +22,4 @@ requires:
   File::pushd: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.006
+version: 0.007
