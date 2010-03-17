@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.007';
+our $VERSION = '0.008';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;

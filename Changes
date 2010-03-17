@@ -1,6 +1,9 @@
 Revision history for Git-Wrapper
+0.008   2010-03-17
+        fix the tests for git >= 1.7
+
 0.007   2009-08-26
-		fix tests even more firmly (perigrin)
+        fix tests even more firmly (perigrin)
 
 0.006   2009-06-01
 

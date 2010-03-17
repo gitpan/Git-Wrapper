@@ -44,7 +44,7 @@ ok(my $e = $@, "got an error");
 if ($git->version lt '1.6') {
   like($e, qr/which does not exist/);
 } else {
-  like($e, qr/is not a git-command/);
+  like($e, qr/is not a git[- ]command/);
 }
 
 my $date = strftime("%Y-%m-%d %H:%M:%S %z", localtime($time));
