@@ -34,17 +34,20 @@ is_deeply(
 my $time = time;
 $git->commit({ message => "FIRST" });
 
-my @rev_list =  
+my @rev_list =
   $git->rev_list({ all => 1, pretty => 'oneline' });
 is(@rev_list, 1);
 like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
-  
-eval { $git->a_command_not_likely_to_exist };
-ok(my $e = $@, "got an error");
-if ($git->version lt '1.6') {
-  like($e, qr/which does not exist/);
-} else {
-  like($e, qr/is not a git[- ]command/);
+
+eval { $git->moo }; # very unlikely to exist, help.autocorrect guesses 'log'
+if (my $e = $@) {   # autocorrect is off
+  if ($git->version lt '1.6') {
+    like($e, qr/which does not exist/);
+  } elsif ($git->version lt '1.7') {
+    like($e, qr/is not a git-command/);
+  } else {
+    like($e, qr/is not a git command/);
+  }
 }
 
 my $date = strftime("%Y-%m-%d %H:%M:%S %z", localtime($time));

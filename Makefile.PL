@@ -10,6 +10,6 @@ requires 'File::pushd';
 
 requires_external_bin 'git';
 
+auto_set_repository;
 auto_manifest;
-
 WriteAll;

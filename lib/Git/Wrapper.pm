@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.008';
+our $VERSION = '0.009';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -98,6 +98,7 @@ sub log {
   my $self = shift;
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{no_color} = 1;
+  $opt->{pretty}   = 'medium';
   my @out = $self->_cmd(log => $opt, @_);
 
   my @logs;
@@ -167,7 +168,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.006
+  Version 0.008
 
 =head1 SYNOPSIS
 
