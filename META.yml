@@ -24,4 +24,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/perigrin/Git-Wrapper.git
-version: 0.009
+version: 0.010

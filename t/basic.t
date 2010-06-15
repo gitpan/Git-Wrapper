@@ -50,10 +50,12 @@ if (my $e = $@) {   # autocorrect is off
   }
 }
 
-my $date = strftime("%Y-%m-%d %H:%M:%S %z", localtime($time));
+my $date = strftime("%Y-%m-%d %H:%M:%S", localtime($time));
 my @log = $git->log({ date => 'iso' });
 is(@log, 1, 'one log entry');
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
 is($log->message, "FIRST\n", "message");
-is($log->date, $date, "date");
+my $log_date = $log->date;
+$log_date =~ s/ [+-]\d+$//;
+is($log_date, $date, "date");

@@ -1,16 +1,20 @@
 Revision history for Git-Wrapper
 
+0.010   2010-06-14
+        
+        Win32 Support -- Docs and Tests (Christian Walde)
+        
+
 0.009   2010-06-05
 
         stop failing tests on git 1.7 or newer (Aristotle Pagaltzis)
         do not rely on default value of log --pretty (Aristotle Pagaltzis)
 
-0.008   2010-03-17
+0.008   2010-03-17 
 
         fix the tests for git >= 1.7 (Michael Schout)
 
 0.007   2009-08-26
-
         fix tests even more firmly (perigrin)
 
 0.006   2009-06-01

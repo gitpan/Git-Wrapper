@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.009';
+our $VERSION = '0.010';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -168,7 +168,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.008
+  Version 0.010
 
 =head1 SYNOPSIS
 
@@ -250,6 +250,15 @@ of C<Git::Wrapper::Log> objects.  They have four methods:
 =item * message
 
 =back
+
+=head1 COMPATIBILITY
+
+On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
+Git-1.7.1-preview20100612 due to a bug involving the return value of a git
+command in cmd/git.cmd.  If you use the msysGit version distributed with
+GitExtensions or an earlier version of msysGit, tests will fail during
+installation of this module.  You can get the latest version of msysGit on the
+Google Code project page: L<http://code.google.com/p/msysgit/downloads>
 
 =head1 SEE ALSO
 
