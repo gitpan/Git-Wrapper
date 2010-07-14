@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.010';
+our $VERSION = '0.011';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -125,6 +125,35 @@ sub log {
   return @logs;
 }
 
+my %STATUS_CONFLICTS = map { $_ => 1 } qw<DD AU UD UA DU AA UU>;
+
+sub status {
+  my $self = shift;
+  my $opt  = ref $_[0] eq 'HASH' ? shift : {};
+  $opt->{$_} = 1 for qw<porcelain>;
+  my @out = $self->_cmd(status => $opt, @_);
+  my $statuses = Git::Wrapper::Statuses->new;
+  return $statuses if !@out;
+
+  for (@out) {
+    my ($x, $y, $from, $to) = $_ =~ /\A(.)(.) (.*?)(?: -> (.*))?\z/;
+
+    if ($STATUS_CONFLICTS{"$x$y"}) {
+      $statuses->add('conflict', "$x$y", $from, $to);
+    }
+    elsif ($x eq '?' && $y eq '?') {
+      $statuses->add('unknown', '?', $from, $to);
+    }
+    else {
+      $statuses->add('changed', $y, $from, $to)
+        if $y ne ' ';
+      $statuses->add('indexed', $x, $from, $to)
+        if $x ne ' ';
+    }
+  }
+  return $statuses;
+}
+
 package Git::Wrapper::Exception;
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -160,6 +189,58 @@ sub date { shift->attr->{date} }
 sub author { shift->attr->{author} }
 
 1;
+
+package Git::Wrapper::Statuses;
+
+sub new { return bless {} => shift }
+
+sub add {
+  my ($self, $type, $mode, $from, $to) = @_;
+  my $status = Git::Wrapper::Status->new($mode, $from, $to);
+  push @{ $self->{ $type } }, $status;
+}
+
+sub get {
+  my ($self, $type) = @_;
+  return @{ defined $self->{$type} ? $self->{$type} : [] };
+}
+
+1;
+
+package Git::Wrapper::Status;
+
+my %modes = (
+  M   => 'modified',
+  A   => 'added',
+  D   => 'deleted',
+  R   => 'renamed',
+  C   => 'copied',
+  U   => 'conflict',
+  '?' => 'unknown',
+  DD  => 'both deleted',
+  AA  => 'both added',
+  UU  => 'both modified',
+  AU  => 'added by us',
+  DU  => 'deleted by us',
+  UA  => 'added by them',
+  UD  => 'deleted by them',
+);
+
+sub new {
+  my ($class, $mode, $from, $to) = @_;
+  return bless {
+    mode => $mode,
+    from => $from,
+    to   => $to,
+  } => $class;
+}
+
+sub mode { $modes{ shift->{mode} } }
+
+sub from { shift->{from} }
+
+sub to   { shift->{to} // '' }
+
 __END__
 
 =head1 NAME
@@ -185,7 +266,7 @@ argument passing, instead of CLI-style C<--options> as L<Git> does.
 =head1 METHODS
 
 Except as documented, every git subcommand is available as a method on a
-Git::Wrapper object.
+Git::Wrapper object.  Replace any hyphens in the git command with underscores.
 
 The first argument should be a hashref containing options and their values.
 Boolean options are either true (included) or false (excluded).  The remaining
@@ -251,6 +332,112 @@ of C<Git::Wrapper::Log> objects.  They have four methods:
 
 =back
 
+=head2 status
+
+  my $statuses = $git->status;
+
+This returns an instance of Git::Wrapper:Statuses which has one public method:
+
+  my @status = $statuses->get($group)
+
+Which returns an array of Git::Wrapper::Status objects, one per file changed.
+
+There are four status groups, each of which may contain zero or more changes.
+
+=over
+
+=item * indexed : Changed & added to the index (aka, will be committed)
+
+=item * changed : Changed but not in the index (aka, won't be committed)
+
+=item * unknown : Untracked files
+
+=item * conflict : Merge conflicts
+
+=back
+
+Note that a single file can occur in more than one group.  Eg, a modified file
+that has been added to the index will appear in the 'indexed' list.  If it is
+subsequently further modified it will additionally appear in the 'changed'
+group.
+
+A Git::Wrapper::Status object has three methods you can call:
+
+  my $from = $status->from;
+
+The file path of the changed file, relative to the repo root.  For renames,
+this is the original path.
+
+  my $to = $status->to;
+
+Renames returns the new path/name for the path.  In all other cases returns
+an empty string.
+
+  my $mode = $status->mode;
+
+Indicates what has changed about the file.
+
+Within each group (except 'conflict') a file can be in one of a number of
+modes, although some modes only occur in some groups (eg, 'added' never appears
+in the 'unknown' group).
+
+=over
+
+=item * modified
+
+=item * added
+
+=item * deleted
+
+=item * renamed
+
+=item * copied
+
+=item * conflict
+
+=back
+
+All files in the 'unknown' group will have a mode of 'unknown' (which is
+redundant but at least consistent).
+
+The 'conflict' group instead has the following modes.
+
+=over
+
+=item * 'both deleted' : deleted on both branches
+
+=item * 'both added'   : added on both branches
+
+=item * 'both modified' : modified on both branches
+
+=item * 'added by us'  : added only on our branch
+
+=item * 'deleted by us' : deleted only on our branch
+
+=item * 'added by them' : added on the branch we are merging in
+
+=item * 'deleted by them' : deleted on the branch we are merging in
+
+=back
+
+See git-status man page for more details.
+
+=head3 Example
+
+    my $git = Git::Wrapper->new('/path/to/git/repo');
+    my $statuses = $git->status;
+    for my $type (qw<indexed changed unknown conflict>) {
+        my @states = $statuses->get($type)
+            or next;
+        print "Files in state $type\n";
+        for (@states) {
+            print '  ', $_->mode, ' ', $_->from;
+            print ' renamed to ', $_->to
+                if $_->mode eq 'renamed';
+            print "\n";
+        }
+    }
+
 =head1 COMPATIBILITY
 
 On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
@@ -270,6 +457,9 @@ Git itself is at L<http://git.or.cz>.
 =head1 AUTHOR
 
 Hans Dieter Pearcey, C<< <hdp@cpan.org> >>
+Chris Prather, C<< <chris@prather.org> >>
+
+Other Authors as listed in Changes.
 
 =head1 BUGS
 
@@ -280,7 +470,7 @@ notified of progress on your bug as I make changes.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008 Hans Dieter Pearcey, All Rights Reserved.
+Copyright 2008 Hans Dieter Pearcey, Some Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

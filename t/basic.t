@@ -39,17 +39,6 @@ my @rev_list =
 is(@rev_list, 1);
 like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
 
-eval { $git->moo }; # very unlikely to exist, help.autocorrect guesses 'log'
-if (my $e = $@) {   # autocorrect is off
-  if ($git->version lt '1.6') {
-    like($e, qr/which does not exist/);
-  } elsif ($git->version lt '1.7') {
-    like($e, qr/is not a git-command/);
-  } else {
-    like($e, qr/is not a git command/);
-  }
-}
-
 my $date = strftime("%Y-%m-%d %H:%M:%S", localtime($time));
 my @log = $git->log({ date => 'iso' });
 is(@log, 1, 'one log entry');

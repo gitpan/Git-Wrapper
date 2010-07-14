@@ -1,16 +1,21 @@
 Revision history for Git-Wrapper
 
+0.011   2010-07-14
+
+        Doc Patch (Gabrielle Roth)
+        Git Status Support (Murray)
+        Remove the Stupid basic.t test (Jonathan Scott Duff)
+
 0.010   2010-06-14
-        
+
         Win32 Support -- Docs and Tests (Christian Walde)
-        
 
 0.009   2010-06-05
 
         stop failing tests on git 1.7 or newer (Aristotle Pagaltzis)
         do not rely on default value of log --pretty (Aristotle Pagaltzis)
 
-0.008   2010-03-17 
+0.008   2010-03-17
 
         fix the tests for git >= 1.7 (Michael Schout)
 
@@ -28,7 +33,6 @@ Revision history for Git-Wrapper
 0.004   2008-06-19
 
         add links to other git-related things
-
         inflate Git::Wrapper::Log objects
 
 0.003   2008-06-05
