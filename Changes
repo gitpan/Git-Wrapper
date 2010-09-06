@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.013   2010-09-06
+
+        Added missing dependency for Test::Deep
+
 0.012   2010-09-05
 
         Rewrote // operator into pre-5.10 perl

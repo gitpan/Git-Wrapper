@@ -5,7 +5,8 @@ author:
   - 'Hans Dieter Pearcey <hdp@cpan.org>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
-  Test::More: 0
+  Test::Deep: 0
+  Test::More: 0.92
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
@@ -25,4 +26,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/perigrin/Git-Wrapper.git
-version: 0.012
+version: 0.013

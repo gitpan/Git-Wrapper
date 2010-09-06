@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More 'no_plan';
+use Test::More;
 
 use File::Temp qw(tempdir);
 use IO::File;
@@ -48,3 +48,5 @@ is($log->message, "FIRST\n", "message");
 my $log_date = $log->date;
 $log_date =~ s/ [+-]\d+$//;
 is($log_date, $date, "date");
+
+done_testing();

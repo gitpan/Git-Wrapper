@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.012';
+our $VERSION = '0.013';
 our $DEBUG=0;
 use IPC::Open3 () ;
 use Symbol;
