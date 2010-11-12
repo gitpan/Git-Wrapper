@@ -1,5 +1,12 @@
 Revision history for Git-Wrapper
 
+0.014   
+
+        Added empty commit message handling (Robert Bohne)
+        Fixed failed tests on slow smokers. (Robert Bohne)
+        Convert to Dist::Zilla (John SJ Anderson)
+        Add 'is_dirty' helper to Statuses (John SJ Anderson)
+
 0.013   2010-09-06
 
         Added missing dependency for Test::Deep

@@ -3,8 +3,11 @@ use strict;
 use warnings;
 
 package Git::Wrapper;
+BEGIN {
+  $Git::Wrapper::VERSION = '0.014';
+}
+#ABSTRACT: wrap git(7) command-line interface
 
-our $VERSION = '0.013';
 our $DEBUG=0;
 use IPC::Open3 () ;
 use Symbol;
@@ -24,7 +27,7 @@ my $GIT = 'git';
 sub _opt {
   my $name = shift;
   $name =~ tr/_/-/;
-  return length($name) == 1 
+  return length($name) == 1
     ? "-$name"
     : "--$name"
   ;
@@ -52,11 +55,11 @@ sub _cmd {
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
   push @cmd, @_;
-    
+
   #print "running [@cmd]\n";
   my @out;
   my @err;
-  
+
   {
     my $d = pushd $self->dir;
     my ($wtr, $rdr, $err);
@@ -76,7 +79,7 @@ sub _cmd {
       status => $? >> 8,
     );
   }
-    
+
   chomp(@out);
   return @out;
 }
@@ -105,21 +108,23 @@ sub log {
   my @out = $self->_cmd(log => $opt, @_);
 
   my @logs;
-  while (@out) {
-    local $_ = shift @out;
-    die "unhandled: $_" unless /^commit (\S+)/;
+  while (my $line = shift @out) {
+    die "unhandled: $line" unless $line =~ /^commit (\S+)/;
     my $current = Git::Wrapper::Log->new($1);
-    $_ = shift @out;
-
-    while (/^(\S+):\s+(.+)$/) {
+    $line = shift @out; # next line;
+    while ($line =~ /^(\S+):\s+(.+)$/) {
       $current->attr->{lc $1} = $2;
-      $_ = shift @out;
+      $line = shift @out; # next line;
     }
-    die "no blank line separating head from message" if $_;
+    die "no blank line separating head from message" if $line;
     my $message = '';
-    while (@out and length($_ = shift @out)) {
-      s/^\s+//;
-      $message .= "$_\n";
+    while (
+      @out 
+      and $out[0] !~ /^commit (\S+)/ 
+      and length($line = shift @out)
+    ) {
+      $line =~ s/^\s+//;
+      $message .= "$line\n";
     }
     $current->message($message);
     push @logs, $current;
@@ -158,6 +163,9 @@ sub status {
 }
 
 package Git::Wrapper::Exception;
+BEGIN {
+  $Git::Wrapper::Exception::VERSION = '0.014';
+}
 
 sub new { my $class = shift; bless { @_ } => $class }
 
@@ -167,12 +175,15 @@ use overload (
 );
 
 sub output { join "", map { "$_\n" } @{ shift->{output} } }
-sub error  { join "", map { "$_\n" } @{ shift->{error} } } 
+sub error  { join "", map { "$_\n" } @{ shift->{error} } }
 sub status { shift->{status} }
 
 package Git::Wrapper::Log;
+BEGIN {
+  $Git::Wrapper::Log::VERSION = '0.014';
+}
 
-sub new { 
+sub new {
   my ($class, $id, %arg) = @_;
   return bless {
     id => $id,
@@ -194,6 +205,9 @@ sub author { shift->attr->{author} }
 1;
 
 package Git::Wrapper::Statuses;
+BEGIN {
+  $Git::Wrapper::Statuses::VERSION = '0.014';
+}
 
 sub new { return bless {} => shift }
 
@@ -208,9 +222,18 @@ sub get {
   return @{ defined $self->{$type} ? $self->{$type} : [] };
 }
 
+sub is_dirty {
+  my( $self ) = @_;
+
+  return keys %$self ? 1 : 0;
+}
+
 1;
 
 package Git::Wrapper::Status;
+BEGIN {
+  $Git::Wrapper::Status::VERSION = '0.014';
+}
 
 my %modes = (
   M   => 'modified',
@@ -244,7 +267,9 @@ sub from { shift->{from} }
 
 sub to   { defined( $_[0]->{to} ) ? $_[0]->{to} : '' }
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
@@ -252,7 +277,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.010
+version 0.014
 
 =head1 SYNOPSIS
 
@@ -339,7 +364,15 @@ of C<Git::Wrapper::Log> objects.  They have four methods:
 
   my $statuses = $git->status;
 
-This returns an instance of Git::Wrapper:Statuses which has one public method:
+This returns an instance of Git::Wrapper:Statuses which has two public
+methods. First, C<is_dirty>:
+
+  my $dirty_flag = $statuses->is_dirty;
+
+Which returns a true/false value depending on whether the repository has any
+uncommitted changes.
+
+Second, C<get>:
 
   my @status = $statuses->get($group)
 
@@ -457,13 +490,6 @@ version-controle systems.
 
 Git itself is at L<http://git.or.cz>.
 
-=head1 AUTHOR
-
-Hans Dieter Pearcey, C<< <hdp@cpan.org> >>
-Chris Prather, C<< <chris@prather.org> >>
-
-Other Authors as listed in Changes.
-
 =head1 BUGS
 
 Please report any bugs or feature requests to
@@ -471,11 +497,29 @@ C<bug-git-wrapper@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.  I will be notified, and then you'll automatically be
 notified of progress on your bug as I make changes.
 
-=head1 COPYRIGHT & LICENSE
+=head1 AUTHORS
 
-Copyright 2008 Hans Dieter Pearcey, Some Rights Reserved.
+=over 4
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+=item *
+
+Hans Dieter Pearcey <hdp@cpan.org>
+
+=item *
+
+Chris Prather <chris@prather.org>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2008 by Hans Dieter Pearcey.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+
