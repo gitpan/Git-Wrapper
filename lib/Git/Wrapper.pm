@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 BEGIN {
-  $Git::Wrapper::VERSION = '0.014';
+  $Git::Wrapper::VERSION = '0.015';
 }
 #ABSTRACT: wrap git(7) command-line interface
 
@@ -61,7 +61,7 @@ sub _cmd {
   my @err;
 
   {
-    my $d = pushd $self->dir;
+    my $d = pushd $self->dir unless $cmd eq 'clone';
     my ($wtr, $rdr, $err);
     $err = Symbol::gensym;
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
@@ -117,13 +117,14 @@ sub log {
       $line = shift @out; # next line;
     }
     die "no blank line separating head from message" if $line;
+    my ( $initial_indent ) = $out[0] =~ /^(\s*)/ if @out;
     my $message = '';
     while (
       @out 
       and $out[0] !~ /^commit (\S+)/ 
       and length($line = shift @out)
     ) {
-      $line =~ s/^\s+//;
+      $line =~ s/^$initial_indent//; # strip just the indenting added by git
       $message .= "$line\n";
     }
     $current->message($message);
@@ -164,7 +165,7 @@ sub status {
 
 package Git::Wrapper::Exception;
 BEGIN {
-  $Git::Wrapper::Exception::VERSION = '0.014';
+  $Git::Wrapper::Exception::VERSION = '0.015';
 }
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -180,7 +181,7 @@ sub status { shift->{status} }
 
 package Git::Wrapper::Log;
 BEGIN {
-  $Git::Wrapper::Log::VERSION = '0.014';
+  $Git::Wrapper::Log::VERSION = '0.015';
 }
 
 sub new {
@@ -206,7 +207,7 @@ sub author { shift->attr->{author} }
 
 package Git::Wrapper::Statuses;
 BEGIN {
-  $Git::Wrapper::Statuses::VERSION = '0.014';
+  $Git::Wrapper::Statuses::VERSION = '0.015';
 }
 
 sub new { return bless {} => shift }
@@ -232,7 +233,7 @@ sub is_dirty {
 
 package Git::Wrapper::Status;
 BEGIN {
-  $Git::Wrapper::Status::VERSION = '0.014';
+  $Git::Wrapper::Status::VERSION = '0.015';
 }
 
 my %modes = (
@@ -277,7 +278,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,11 @@
 Revision history for Git-Wrapper
 
-0.014   
+0.015     2011-07-16 10:15:15 America/New_York
+
+        Added a fix that allows the 'clone' command to work (John SJ Anderson)
+        Change 'log' indentation stripping behavior (RT#56427, Mark Grimes)
+
+0.014   2010-11-12
 
         Added empty commit message handling (Robert Bohne)
         Fixed failed tests on slow smokers. (Robert Bohne)

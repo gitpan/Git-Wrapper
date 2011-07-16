@@ -34,7 +34,7 @@ is_deeply(
 is( $git->status->is_dirty , 1 , 'repo is dirty' );
 
 my $time = time;
-$git->commit({ message => "FIRST" });
+$git->commit({ message => "FIRST\n\n\tBODY\n" });
 
 is( $git->status->is_dirty , 0 , 'repo is clean' );
 
@@ -47,7 +47,7 @@ my @log = $git->log({ date => 'raw' });
 is(@log, 1, 'one log entry');
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
-is($log->message, "FIRST\n", "message");
+is($log->message, "FIRST\n\n\tBODY\n", "message");
 my $log_date = $log->date;
 $log_date =~ s/ [+-]\d+$//;
 cmp_ok(( $log_date - $time ), '<=', 5, 'date');

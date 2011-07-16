@@ -2,7 +2,7 @@ NAME
     Git::Wrapper - wrap git(7) command-line interface
 
 VERSION
-    version 0.014
+    version 0.015
 
 SYNOPSIS
       my $git = Git::Wrapper->new('/var/foo');
