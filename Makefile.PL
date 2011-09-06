@@ -9,33 +9,37 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'wrap git(7) command-line interface',
-  'AUTHOR' => 'Hans Dieter Pearcey <hdp@cpan.org>, Chris Prather <chris@prather.org>',
-  'BUILD_REQUIRES' => {
-    'File::Path' => '0',
-    'File::Spec' => '0',
-    'File::Temp' => '0',
-    'IO::File' => '0',
-    'POSIX' => '0',
-    'Test::Deep' => '0',
-    'Test::More' => '0'
+  "ABSTRACT" => "wrap git(7) command-line interface",
+  "AUTHOR" => "Hans Dieter Pearcey <hdp\@cpan.org>, Chris Prather <chris\@prather.org>",
+  "BUILD_REQUIRES" => {
+    "File::Path" => 0,
+    "File::Spec" => 0,
+    "IO::File" => 0,
+    "POSIX" => 0,
+    "Test::Deep" => 0,
+    "Test::More" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'Git-Wrapper',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'Git::Wrapper',
-  'PREREQ_PM' => {
-    'File::pushd' => '0',
-    'IPC::Open3' => '0',
-    'Symbol' => '0',
-    'overload' => '0'
+  "DISTNAME" => "Git-Wrapper",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "Git::Wrapper",
+  "PREREQ_PM" => {
+    "File::Temp" => 0,
+    "File::pushd" => 0,
+    "IPC::Cmd" => 0,
+    "IPC::Open3" => 0,
+    "Sort::Versions" => 0,
+    "Symbol" => 0,
+    "overload" => 0,
+    "strict" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '0.015',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.016",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 

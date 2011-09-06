@@ -2,7 +2,7 @@ NAME
     Git::Wrapper - wrap git(7) command-line interface
 
 VERSION
-    version 0.015
+    version 0.016
 
 SYNOPSIS
       my $git = Git::Wrapper->new('/var/foo');
@@ -71,22 +71,44 @@ METHODS
 
     *   message
 
+  has_git_in_path
+    This method returns a true or false value indicating if there is a 'git'
+    binary in the current $PATH.
+
+  supports_status_porcelain
+  supports_log_raw_dates
+    These methods return a true or false value (1 or 0) indicating whether
+    the git binary being used has support for these options. (The
+    '--porcelain' option on 'git status' and the '--date=raw' option on 'git
+    log', respectively.)
+
+    These are primarily for use in this distribution's test suite, but may
+    also be useful when writing code using Git::Wrapper that might be run
+    with different versions of the underlying git binary.
+
   status
+    When running with an underlying git binary that returns false for the
+    "supports_status_porcelain" method, this method will act like any other
+    wrapped command: it will return output as an array of chomped lines.
+
+    When running with an underlying git binary that returns true for the
+    "supports_status_porcelain" method, this method instead returns an
+    instance of Git::Wrapper::Statuses:
+
       my $statuses = $git->status;
 
-    This returns an instance of Git::Wrapper:Statuses which has two public
-    methods. First, "is_dirty":
+    Git::Wrapper:Statuses has two public methods. First, "is_dirty":
 
       my $dirty_flag = $statuses->is_dirty;
 
-    Which returns a true/false value depending on whether the repository has
+    which returns a true/false value depending on whether the repository has
     any uncommitted changes.
 
     Second, "get":
 
       my @status = $statuses->get($group)
 
-    Which returns an array of Git::Wrapper::Status objects, one per file
+    which returns an array of Git::Wrapper::Status objects, one per file
     changed.
 
     There are four status groups, each of which may contain zero or more
@@ -181,6 +203,11 @@ COMPATIBILITY
     will fail during installation of this module. You can get the latest
     version of msysGit on the Google Code project page:
     <http://code.google.com/p/msysgit/downloads>
+
+ENVIRONMENT VARIABLES
+    Git::Wrapper normally uses the first 'git' binary in your path, but if
+    the GIT_WRAPPER_GIT environment variable is set, that value will be used
+    instead.
 
 SEE ALSO
     VCI::VCS::Git is the git implementation for VCI, a generic interface to

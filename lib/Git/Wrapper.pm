@@ -3,26 +3,35 @@ use strict;
 use warnings;
 
 package Git::Wrapper;
-BEGIN {
-  $Git::Wrapper::VERSION = '0.015';
+{
+  $Git::Wrapper::VERSION = '0.016';
 }
 #ABSTRACT: wrap git(7) command-line interface
 
 our $DEBUG=0;
-use IPC::Open3 () ;
-use Symbol;
+
 use File::pushd;
+use File::Temp;
+use IPC::Cmd        qw(can_run);
+use IPC::Open3      qw();
+use Sort::Versions;
+use Symbol;
+
+my $GIT = $ENV{GIT_WRAPPER_GIT} // 'git';
 
 sub new {
   my ($class, $arg, %opt) = @_;
+
   my $self = bless { dir => $arg, %opt } => $class;
+
   die "usage: $class->new(\$dir)" unless $self->dir;
+
   return $self;
 }
 
-sub dir { shift->{dir} }
+sub has_git_in_path { can_run('git') }
 
-my $GIT = 'git';
+sub dir { shift->{dir} }
 
 sub _opt {
   my $name = shift;
@@ -44,34 +53,50 @@ sub _cmd {
 
   for (grep { /^-/ } keys %$opt) {
     (my $name = $_) =~ s/^-//;
+
     my $val = delete $opt->{$_};
     next if $val eq '0';
+
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
+
   push @cmd, $cmd;
+
   for my $name (keys %$opt) {
     my $val = delete $opt->{$name};
     next if $val eq '0';
+
+    ( $name, $val ) = $self->_message_tempfile( $val )
+      if $self->_win32_multiline_commit_msg( $cmd, $name, $val );
+
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
+
   push @cmd, @_;
 
   #print "running [@cmd]\n";
-  my @out;
-  my @err;
+  my( @out , @err );
 
   {
     my $d = pushd $self->dir unless $cmd eq 'clone';
+
     my ($wtr, $rdr, $err);
+
     $err = Symbol::gensym;
+
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
+
     my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
+
     close $wtr;
     chomp(@out = <$rdr>);
     chomp(@err = <$err>);
+
     waitpid $pid, 0;
   };
+
   #print "status: $?\n";
+
   if ($?) {
     die Git::Wrapper::Exception->new(
       output => \@out,
@@ -84,10 +109,32 @@ sub _cmd {
   return @out;
 }
 
+sub _win32_multiline_commit_msg {
+  my ( $self, $cmd, $name, $val ) = @_;
+
+  return 0 if $^O ne "MSWin32";
+  return 0 if $cmd ne "commit";
+  return 0 if $name ne "m" and $name ne "message";
+  return 0 if $val !~ /\n/;
+
+  return 1;
+}
+
+sub _message_tempfile {
+  my ( $self, $message ) = @_;
+
+  my $tmp = File::Temp->new( UNLINK => 0 );
+  $tmp->print( $message );
+
+  return ( "file", '"'.$tmp->filename.'"' );
+}
+
 sub AUTOLOAD {
   my $self = shift;
+
   (my $meth = our $AUTOLOAD) =~ s/.+:://;
   return if $meth eq 'DESTROY';
+
   $meth =~ tr/_/-/;
 
   return $self->_cmd($meth, @_);
@@ -95,53 +142,89 @@ sub AUTOLOAD {
 
 sub version {
   my $self = shift;
+
   my ($version) = $self->_cmd('version');
+
   $version =~ s/^git version //;
+
   return $version;
 }
 
 sub log {
   my $self = shift;
+
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{no_color} = 1;
   $opt->{pretty}   = 'medium';
+
   my @out = $self->_cmd(log => $opt, @_);
 
   my @logs;
   while (my $line = shift @out) {
     die "unhandled: $line" unless $line =~ /^commit (\S+)/;
+
     my $current = Git::Wrapper::Log->new($1);
+
     $line = shift @out; # next line;
+
     while ($line =~ /^(\S+):\s+(.+)$/) {
       $current->attr->{lc $1} = $2;
       $line = shift @out; # next line;
     }
+
     die "no blank line separating head from message" if $line;
+
     my ( $initial_indent ) = $out[0] =~ /^(\s*)/ if @out;
+
     my $message = '';
     while (
-      @out 
-      and $out[0] !~ /^commit (\S+)/ 
+      @out
+      and $out[0] !~ /^commit (\S+)/
       and length($line = shift @out)
     ) {
       $line =~ s/^$initial_indent//; # strip just the indenting added by git
       $message .= "$line\n";
     }
+
     $current->message($message);
+
     push @logs, $current;
   }
 
   return @logs;
 }
 
+sub supports_log_raw_dates {
+  my $self = shift;
+
+  # The '--date=raw' option to 'git log' was added in version 1.6.2
+  return 0 if ( versioncmp( $self->version , '1.6.2' ) eq -1 );
+  return 1;
+}
+
+sub supports_status_porcelain {
+  my $self = shift;
+
+  # The '--porcelain' option to git status was added in version 1.7.0
+  return 0 if ( versioncmp( $self->version , '1.7' ) eq -1 );
+  return 1;
+}
+
 my %STATUS_CONFLICTS = map { $_ => 1 } qw<DD AU UD UA DU AA UU>;
 
 sub status {
   my $self = shift;
+
+  return $self->_cmd('status' , @_ )
+    unless $self->supports_status_porcelain;
+
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{$_} = 1 for qw<porcelain>;
+
   my @out = $self->_cmd(status => $opt, @_);
+
   my $statuses = Git::Wrapper::Statuses->new;
+
   return $statuses if !@out;
 
   for (@out) {
@@ -164,8 +247,8 @@ sub status {
 }
 
 package Git::Wrapper::Exception;
-BEGIN {
-  $Git::Wrapper::Exception::VERSION = '0.015';
+{
+  $Git::Wrapper::Exception::VERSION = '0.016';
 }
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -180,14 +263,14 @@ sub error  { join "", map { "$_\n" } @{ shift->{error} } }
 sub status { shift->{status} }
 
 package Git::Wrapper::Log;
-BEGIN {
-  $Git::Wrapper::Log::VERSION = '0.015';
+{
+  $Git::Wrapper::Log::VERSION = '0.016';
 }
 
 sub new {
   my ($class, $id, %arg) = @_;
   return bless {
-    id => $id,
+    id   => $id,
     attr => {},
     %arg,
   } => $class;
@@ -206,20 +289,23 @@ sub author { shift->attr->{author} }
 1;
 
 package Git::Wrapper::Statuses;
-BEGIN {
-  $Git::Wrapper::Statuses::VERSION = '0.015';
+{
+  $Git::Wrapper::Statuses::VERSION = '0.016';
 }
 
 sub new { return bless {} => shift }
 
 sub add {
   my ($self, $type, $mode, $from, $to) = @_;
+
   my $status = Git::Wrapper::Status->new($mode, $from, $to);
+
   push @{ $self->{ $type } }, $status;
 }
 
 sub get {
   my ($self, $type) = @_;
+
   return @{ defined $self->{$type} ? $self->{$type} : [] };
 }
 
@@ -232,8 +318,8 @@ sub is_dirty {
 1;
 
 package Git::Wrapper::Status;
-BEGIN {
-  $Git::Wrapper::Status::VERSION = '0.015';
+{
+  $Git::Wrapper::Status::VERSION = '0.016';
 }
 
 my %modes = (
@@ -255,6 +341,7 @@ my %modes = (
 
 sub new {
   my ($class, $mode, $from, $to) = @_;
+
   return bless {
     mode => $mode,
     from => $from,
@@ -278,7 +365,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -361,23 +448,47 @@ of C<Git::Wrapper::Log> objects.  They have four methods:
 
 =back
 
+=head2 has_git_in_path
+
+This method returns a true or false value indicating if there is a 'git'
+binary in the current $PATH.
+
+=head2 supports_status_porcelain
+
+=head2 supports_log_raw_dates
+
+These methods return a true or false value (1 or 0) indicating whether the git
+binary being used has support for these options. (The '--porcelain' option on
+'git status' and the '--date=raw' option on 'git log', respectively.)
+
+These are primarily for use in this distribution's test suite, but may also be
+useful when writing code using Git::Wrapper that might be run with different
+versions of the underlying git binary.
+
 =head2 status
+
+When running with an underlying git binary that returns false for the
+L</supports_status_porcelain> method, this method will act like any other
+wrapped command: it will return output as an array of chomped lines.
+
+When running with an underlying git binary that returns true for the
+L</supports_status_porcelain> method, this method instead returns an
+instance of Git::Wrapper::Statuses:
 
   my $statuses = $git->status;
 
-This returns an instance of Git::Wrapper:Statuses which has two public
-methods. First, C<is_dirty>:
+Git::Wrapper:Statuses has two public methods. First, C<is_dirty>:
 
   my $dirty_flag = $statuses->is_dirty;
 
-Which returns a true/false value depending on whether the repository has any
+which returns a true/false value depending on whether the repository has any
 uncommitted changes.
 
 Second, C<get>:
 
   my @status = $statuses->get($group)
 
-Which returns an array of Git::Wrapper::Status objects, one per file changed.
+which returns an array of Git::Wrapper::Status objects, one per file changed.
 
 There are four status groups, each of which may contain zero or more changes.
 
@@ -483,6 +594,11 @@ command in cmd/git.cmd.  If you use the msysGit version distributed with
 GitExtensions or an earlier version of msysGit, tests will fail during
 installation of this module.  You can get the latest version of msysGit on the
 Google Code project page: L<http://code.google.com/p/msysgit/downloads>
+
+=head1 ENVIRONMENT VARIABLES
+
+Git::Wrapper normally uses the first 'git' binary in your path, but if the
+GIT_WRAPPER_GIT environment variable is set, that value will be used instead.
 
 =head1 SEE ALSO
 
