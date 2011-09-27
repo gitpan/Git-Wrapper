@@ -8,6 +8,7 @@ Makefile.PL
 README
 dist.ini
 lib/Git/Wrapper.pm
+releases/Git-Wrapper-0.016.tar.gz
 t/00-load.t
 t/basic.t
 t/pod-coverage.t

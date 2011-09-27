@@ -4,9 +4,9 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.016';
+  $Git::Wrapper::VERSION = '0.017';
 }
-#ABSTRACT: wrap git(7) command-line interface
+#ABSTRACT: Wrap git(7) command-line interface
 
 our $DEBUG=0;
 
@@ -17,7 +17,7 @@ use IPC::Open3      qw();
 use Sort::Versions;
 use Symbol;
 
-my $GIT = $ENV{GIT_WRAPPER_GIT} // 'git';
+my $GIT = ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 
 sub new {
   my ($class, $arg, %opt) = @_;
@@ -248,7 +248,7 @@ sub status {
 
 package Git::Wrapper::Exception;
 {
-  $Git::Wrapper::Exception::VERSION = '0.016';
+  $Git::Wrapper::Exception::VERSION = '0.017';
 }
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -264,7 +264,7 @@ sub status { shift->{status} }
 
 package Git::Wrapper::Log;
 {
-  $Git::Wrapper::Log::VERSION = '0.016';
+  $Git::Wrapper::Log::VERSION = '0.017';
 }
 
 sub new {
@@ -290,7 +290,7 @@ sub author { shift->attr->{author} }
 
 package Git::Wrapper::Statuses;
 {
-  $Git::Wrapper::Statuses::VERSION = '0.016';
+  $Git::Wrapper::Statuses::VERSION = '0.017';
 }
 
 sub new { return bless {} => shift }
@@ -319,7 +319,7 @@ sub is_dirty {
 
 package Git::Wrapper::Status;
 {
-  $Git::Wrapper::Status::VERSION = '0.016';
+  $Git::Wrapper::Status::VERSION = '0.017';
 }
 
 my %modes = (
@@ -361,11 +361,11 @@ sub to   { defined( $_[0]->{to} ) ? $_[0]->{to} : '' }
 
 =head1 NAME
 
-Git::Wrapper - wrap git(7) command-line interface
+Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 SYNOPSIS
 
