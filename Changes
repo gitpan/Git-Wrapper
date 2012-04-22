@@ -1,5 +1,14 @@
 Revision history for Git-Wrapper
 
+0.018     2012-04-22 15:30:43 America/New_York
+
+        Misc doc clean ups and tweaks (John SJ Anderson)
+        Add ERR and OUT methods to provide direct access to STDERR and STDOUT, respectively
+          (attempt to address RT#71632, John SJ Anderson)
+        Generate proper calls for single letter options that take values (RT#75955, Fitz Elliott)
+        Update documentation to demonstrate how to pass '0' to an option (RT#58787, John SJ Anderson)
+        Make git-wrapper a bit friendlier on old gits (Ricardo Signes)
+
 0.017     2011-09-27 14:35:19 America/New_York
 
         Remove usage of '//' operator (again) (John SJ Anderson)

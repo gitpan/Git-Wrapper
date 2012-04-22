@@ -3,17 +3,19 @@ abstract: 'Wrap git(7) command-line interface'
 author:
   - 'Hans Dieter Pearcey <hdp@cpan.org>'
   - 'Chris Prather <chris@prather.org>'
+  - 'John SJ Anderson <genehack@genehack.org>'
 build_requires:
   File::Path: 0
   File::Spec: 0
   IO::File: 0
   POSIX: 0
   Test::Deep: 0
+  Test::Exception: 0
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.112621'
+generated_by: 'Dist::Zilla version 4.300014, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -32,78 +34,78 @@ requires:
   warnings: 0
 resources:
   homepage: https://github.com/genehack/Git-Wrapper
-  repository: git://github.com/genehack/Git-Wrapper
-version: 0.017
+  repository: git://github.com/genehack/Git-Wrapper.git
+version: 0.018
 x_Dist_Zilla:
   plugins:
     -
       class: Dist::Zilla::Plugin::GatherDir
       name: '@Basic/GatherDir'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::PruneCruft
       name: '@Basic/PruneCruft'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::ManifestSkip
       name: '@Basic/ManifestSkip'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::MetaYAML
       name: '@Basic/MetaYAML'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::License
       name: '@Basic/License'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::Readme
       name: '@Basic/Readme'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::ExtraTests
       name: '@Basic/ExtraTests'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::ExecDir
       name: '@Basic/ExecDir'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::ShareDir
       name: '@Basic/ShareDir'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::MakeMaker
       name: '@Basic/MakeMaker'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::Manifest
       name: '@Basic/Manifest'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::TestRelease
       name: '@Basic/TestRelease'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::ConfirmRelease
       name: '@Basic/ConfirmRelease'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Basic/UploadToCPAN'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::Git::NextVersion
       name: Git::NextVersion
-      version: 1.112510
+      version: 1.121010
     -
       class: Dist::Zilla::Plugin::AutoPrereqs
       name: AutoPrereqs
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::GithubMeta
       name: GithubMeta
-      version: 0.20
+      version: 0.28
     -
       class: Dist::Zilla::Plugin::InstallGuide
       name: InstallGuide
@@ -111,61 +113,77 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MetaConfig
       name: MetaConfig
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::MetaJSON
       name: MetaJSON
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::NextRelease
       name: NextRelease
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::PkgVersion
       name: PkgVersion
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::PodSyntaxTests
       name: PodSyntaxTests
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::PodWeaver
       name: PodWeaver
       version: 3.101641
     -
-      class: Dist::Zilla::Plugin::ReadmeFromPod
-      name: ReadmeFromPod
-      version: 0.14
+      class: Dist::Zilla::Plugin::ReadmeMarkdownFromPod
+      name: ReadmeMarkdownFromPod
+      version: 0.120120
+    -
+      class: Dist::Zilla::Plugin::CopyFilesFromBuild
+      name: CopyFilesFromBuild
+      version: 0.103510
     -
       class: Dist::Zilla::Plugin::Repository
       name: Repository
       version: 0.18
     -
+      class: Dist::Zilla::Plugin::Git::Commit
+      name: Git::Commit
+      version: 1.121010
+    -
+      class: Dist::Zilla::Plugin::Git::Tag
+      name: Git::Tag
+      version: 1.121010
+    -
+      class: Dist::Zilla::Plugin::Twitter
+      name: Twitter
+      version: 0.014
+    -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':InstallModules'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':IncModules'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':TestFiles'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ExecFiles'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ShareFiles'
-      version: 4.300002
+      version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':MainModule'
-      version: 4.300002
+      version: 4.300014
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
       is_trial: 0
-    version: 4.300002
+    version: 4.300014

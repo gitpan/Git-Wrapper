@@ -10,13 +10,14 @@ use ExtUtils::MakeMaker 6.30;
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Wrap git(7) command-line interface",
-  "AUTHOR" => "Hans Dieter Pearcey <hdp\@cpan.org>, Chris Prather <chris\@prather.org>",
+  "AUTHOR" => "Hans Dieter Pearcey <hdp\@cpan.org>, Chris Prather <chris\@prather.org>, John SJ Anderson <genehack\@genehack.org>",
   "BUILD_REQUIRES" => {
     "File::Path" => 0,
     "File::Spec" => 0,
     "IO::File" => 0,
     "POSIX" => 0,
     "Test::Deep" => 0,
+    "Test::Exception" => 0,
     "Test::More" => 0
   },
   "CONFIGURE_REQUIRES" => {
@@ -37,7 +38,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.017",
+  "VERSION" => "0.018",
   "test" => {
     "TESTS" => "t/*.t"
   }

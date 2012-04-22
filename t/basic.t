@@ -9,6 +9,7 @@ use File::Spec;
 use File::Path qw(mkpath);
 use POSIX qw(strftime);
 use Test::Deep;
+use Test::Exception;
 
 unless ( Git::Wrapper->has_git_in_path ) {
   diag 'EXITING TESTS due to lack of installed git in $PATH.';
@@ -66,6 +67,7 @@ like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
 my $args = $git->supports_log_raw_dates ? { date => 'raw' } : {};
 my @log = $git->log( $args );
 is(@log, 1, 'one log entry');
+
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
 is($log->message, "FIRST\n\n\tBODY\n", "message");
@@ -78,6 +80,12 @@ SKIP: {
   $log_date =~ s/ [+-]\d+$//;
   cmp_ok(( $log_date - $time ), '<=', 5, 'date');
 }
+
+throws_ok { $git->log('--oneline') } qr/^unhandled/ , 'log(--oneline) dies';
+
+my @lines;
+lives_ok { @lines = $git->RUN('log' , '--oneline' ) } 'RUN(log --oneline) lives';
+is( @lines , 1 , 'one log entry' );
 
 SKIP: {
     # Test empty commit message
@@ -96,5 +104,34 @@ SKIP: {
     is(@log, 2, 'two log entries, one with empty commit message');
 };
 
+
+# test --message vs. -m
+my @arg_tests = (
+    ['message', 'long_arg_no_spaces',   'long arg, no spaces in val',  ],
+    ['message', 'long arg with spaces', 'long arg, spaces in val',     ],
+    ['m',       'short_arg_no_spaces',  'short arg, no spaces in val', ],
+    ['m',       'short arg w spaces',   'short arg, spaces in val',    ],
+);
+
+my $arg_file = IO::File->new('>' . File::Spec->catfile($dir, qw(argument_testfile)));
+
+for my $arg_test (@arg_tests) {
+    my ($flag, $msg, $descr) = @$arg_test;
+
+    $arg_file->print("$msg\n");
+    $git->add('argument_testfile');
+    $git->commit({ $flag => $msg });
+
+    my ($arg_log) = $git->log('-n 1');
+
+    is $arg_log->message, "$msg\n", "argument test: $descr";
+}
+
+$git->checkout({b => 'new_branch'});
+
+my ($new_branch) = grep {m/^\*/} $git->branch;
+$new_branch =~ s/^\*\s+|\s+$//g;
+
+is $new_branch, 'new_branch', 'new branch name is correct';
 
 done_testing();

@@ -6,10 +6,13 @@ META.json
 META.yml
 Makefile.PL
 README
+README.mkdn
 dist.ini
 lib/Git/Wrapper.pm
 releases/Git-Wrapper-0.016.tar.gz
+releases/Git-Wrapper-0.14.tar.gz
 t/00-load.t
+t/author-err.t
 t/basic.t
 t/pod-coverage.t
 t/pod.t

@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.017';
+  $Git::Wrapper::VERSION = '0.018';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -33,6 +33,9 @@ sub has_git_in_path { can_run('git') }
 
 sub dir { shift->{dir} }
 
+sub ERR { shift->{err} }
+sub OUT { shift->{out} }
+
 sub _opt {
   my $name = shift;
   $name =~ tr/_/-/;
@@ -42,8 +45,11 @@ sub _opt {
   ;
 }
 
-sub _cmd {
+sub RUN {
   my $self = shift;
+
+  delete $self->{err};
+  delete $self->{out};
 
   my $cmd = shift;
 
@@ -57,7 +63,7 @@ sub _cmd {
     my $val = delete $opt->{$_};
     next if $val eq '0';
 
-    push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
+    push @cmd, _opt($name) . _munge_val($name, $val);
   }
 
   push @cmd, $cmd;
@@ -69,12 +75,11 @@ sub _cmd {
     ( $name, $val ) = $self->_message_tempfile( $val )
       if $self->_win32_multiline_commit_msg( $cmd, $name, $val );
 
-    push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
+    push @cmd,  _opt($name) . _munge_val($name, $val);
   }
 
   push @cmd, @_;
 
-  #print "running [@cmd]\n";
   my( @out , @err );
 
   {
@@ -95,9 +100,15 @@ sub _cmd {
     waitpid $pid, 0;
   };
 
-  #print "status: $?\n";
+  print "status: $?\n" if $DEBUG;
 
-  if ($?) {
+  # In earlier gits (1.5, 1.6, I'm not sure when it changed), "git status"
+  # would exit 1 if there was nothing to commit, or in other cases.  This is
+  # basically insane, and has been fixed, but if we don't require git 1.7, we
+  # should cope with it. -- rjbs, 2012-03-31
+  my $stupid_status = $cmd eq 'status' && @out && ! @err;
+
+  if ($? && ! $stupid_status) {
     die Git::Wrapper::Exception->new(
       output => \@out,
       error  => \@err,
@@ -105,8 +116,21 @@ sub _cmd {
     );
   }
 
+  chomp(@err);
+  $self->{err} = \@err;
+
   chomp(@out);
+  $self->{out} = \@out;
+
   return @out;
+}
+
+sub _munge_val {
+  my( $name , $val ) = @_;
+
+  return $val eq '1'       ? ""
+    : length($name) == 1 ? $val
+    :                      "=$val";
 }
 
 sub _win32_multiline_commit_msg {
@@ -137,13 +161,13 @@ sub AUTOLOAD {
 
   $meth =~ tr/_/-/;
 
-  return $self->_cmd($meth, @_);
+  return $self->RUN($meth, @_);
 }
 
 sub version {
   my $self = shift;
 
-  my ($version) = $self->_cmd('version');
+  my ($version) = $self->RUN('version');
 
   $version =~ s/^git version //;
 
@@ -157,7 +181,7 @@ sub log {
   $opt->{no_color} = 1;
   $opt->{pretty}   = 'medium';
 
-  my @out = $self->_cmd(log => $opt, @_);
+  my @out = $self->RUN(log => $opt, @_);
 
   my @logs;
   while (my $line = shift @out) {
@@ -215,13 +239,13 @@ my %STATUS_CONFLICTS = map { $_ => 1 } qw<DD AU UD UA DU AA UU>;
 sub status {
   my $self = shift;
 
-  return $self->_cmd('status' , @_ )
+  return $self->RUN('status' , @_ )
     unless $self->supports_status_porcelain;
 
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{$_} = 1 for qw<porcelain>;
 
-  my @out = $self->_cmd(status => $opt, @_);
+  my @out = $self->RUN(status => $opt, @_);
 
   my $statuses = Git::Wrapper::Statuses->new;
 
@@ -248,15 +272,22 @@ sub status {
 
 package Git::Wrapper::Exception;
 {
-  $Git::Wrapper::Exception::VERSION = '0.017';
+  $Git::Wrapper::Exception::VERSION = '0.018';
 }
 
 sub new { my $class = shift; bless { @_ } => $class }
 
 use overload (
-  q("") => 'error',
+  q("") => '_stringify',
   fallback => 1,
 );
+
+sub _stringify {
+  my ($self) = @_;
+  my $error = $self->error;
+  return $error if $error =~ /\S/;
+  return "git exited non-zero but had no output to stderr";
+}
 
 sub output { join "", map { "$_\n" } @{ shift->{output} } }
 sub error  { join "", map { "$_\n" } @{ shift->{error} } }
@@ -264,7 +295,7 @@ sub status { shift->{status} }
 
 package Git::Wrapper::Log;
 {
-  $Git::Wrapper::Log::VERSION = '0.017';
+  $Git::Wrapper::Log::VERSION = '0.018';
 }
 
 sub new {
@@ -290,7 +321,7 @@ sub author { shift->attr->{author} }
 
 package Git::Wrapper::Statuses;
 {
-  $Git::Wrapper::Statuses::VERSION = '0.017';
+  $Git::Wrapper::Statuses::VERSION = '0.018';
 }
 
 sub new { return bless {} => shift }
@@ -319,7 +350,7 @@ sub is_dirty {
 
 package Git::Wrapper::Status;
 {
-  $Git::Wrapper::Status::VERSION = '0.017';
+  $Git::Wrapper::Status::VERSION = '0.018';
 }
 
 my %modes = (
@@ -365,7 +396,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 
@@ -391,6 +422,12 @@ arguments are passed as ordinary command arguments.
   $git->commit({ all => 1, message => "stuff" });
 
   $git->checkout("mybranch");
+
+I<N.b.> Because of the way arguments are parsed, should you need to pass an
+explicit '0' value to an option (for example, to have the same effect as
+C<--abrrev=0> on the command line), you should pass it with a leading space, like so:
+
+  $git->describe({ abbrev => ' 0' };
 
 Output is available as an array of lines, each chomped.
 
@@ -586,6 +623,46 @@ See git-status man page for more details.
         }
     }
 
+=head2 RUN
+
+This method bypasses the output rearranging performed by some of the wrapped
+methods described above (i.e., C<log>, C<status>, etc.). This can be useful
+in various situations, such as when you want to produce a particular log
+output format that isn't compatible with the way C<Git::Wrapper> constructs
+C<Git::Wrapper::Log>, or when you want raw C<git status> output that isn't
+parsed into a <Git::Wrapper::Status> object.
+
+This method should be called with an initial string argument of the C<git>
+subcommand you want to run, followed by a hashref containing options and their
+values, and then a list of any other arguments.
+
+=head3 Example
+
+    my $git = Git::Wrapper->new( '/path/to/git/repo' );
+
+    # the 'log' method returns Git::Wrapper::Log objects
+    my @log_objects = $git->log();
+
+    # while 'RUN('log')' returns an array of chomped lines
+    my @log_lines = $git->RUN('log');
+
+=head2 ERR
+
+After a command has been run, this method will return anything that was sent
+to C<STDERR>, in the form of an array of chomped lines. This information will
+be cleared as soon as a new command is executed. This method should B<*NOT*>
+be used as a success/failure check, as C<git> will sometimes produce output on
+STDERR when a command is successful.
+
+=head2 OUT
+
+After a command has been run, this method will return anything that was sent
+to C<STDOUT>, in the form of an array of chomped lines. It is identical to
+what is returned from the method call that runs the command, and is provided
+simply for symmetry with the C<ERR> method. This method should B<*NOT*> be
+used as a success/failure check, as C<git> will frequently not have any output
+with a successful command.
+
 =head1 COMPATIBILITY
 
 On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
@@ -605,14 +682,20 @@ GIT_WRAPPER_GIT environment variable is set, that value will be used instead.
 L<VCI::VCS::Git> is the git implementation for L<VCI>, a generic interface to
 version-controle systems.
 
+L<Other Perl Git Wrappers|https://metacpan.org/module/Git::Repository#OTHER-PERL-GIT-WRAPPERS>
+is a list of other Git interfaces in Perl. If L<Git::Wrapper> doesn't scratch
+your itch, possibly one of the modules listed there will.
+
 Git itself is at L<http://git.or.cz>.
 
-=head1 BUGS
+=head1 REPORTING BUGS & OTHER WAYS TO CONTRIBUTE
 
-Please report any bugs or feature requests to
-C<bug-git-wrapper@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.  I will be notified, and then you'll automatically be
-notified of progress on your bug as I make changes.
+The code for this module is maintained on GitHub, at
+L<https://github.com/genehack/Git-Wrapper>. If you have a patch, feel free to
+fork the repository and submit a pull request. If you find a bug, please open
+an issue on the project at GitHub. (We also watch the L<http://rt.cpan.org>
+queue for Git::Wrapper, so feel free to use that bug reporting system if you
+prefer)
 
 =head1 AUTHORS
 
@@ -625,6 +708,10 @@ Hans Dieter Pearcey <hdp@cpan.org>
 =item *
 
 Chris Prather <chris@prather.org>
+
+=item *
+
+John SJ Anderson <genehack@genehack.org>
 
 =back
 
