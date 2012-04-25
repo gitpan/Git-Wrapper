@@ -8,6 +8,7 @@ use Git::Wrapper;
 use File::Spec;
 use File::Path qw(mkpath);
 use POSIX qw(strftime);
+use Sort::Versions;
 use Test::Deep;
 use Test::Exception;
 
@@ -81,11 +82,18 @@ SKIP: {
   cmp_ok(( $log_date - $time ), '<=', 5, 'date');
 }
 
-throws_ok { $git->log('--oneline') } qr/^unhandled/ , 'log(--oneline) dies';
+SKIP:
+{
+  if ( versioncmp( $git->version , '1.6.3') eq -1 ) {
+    skip 'testing old git without log --oneline support' , 3;
+  }
 
-my @lines;
-lives_ok { @lines = $git->RUN('log' , '--oneline' ) } 'RUN(log --oneline) lives';
-is( @lines , 1 , 'one log entry' );
+  throws_ok { $git->log('--oneline') } qr/^unhandled/ , 'log(--oneline) dies';
+
+  my @lines;
+  lives_ok { @lines = $git->RUN('log' , '--oneline' ) } 'RUN(log --oneline) lives';
+  is( @lines , 1 , 'one log entry' );
+}
 
 SKIP: {
     # Test empty commit message

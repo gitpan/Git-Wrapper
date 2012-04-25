@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.018';
+  $Git::Wrapper::VERSION = '0.019';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -272,7 +272,7 @@ sub status {
 
 package Git::Wrapper::Exception;
 {
-  $Git::Wrapper::Exception::VERSION = '0.018';
+  $Git::Wrapper::Exception::VERSION = '0.019';
 }
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -295,7 +295,7 @@ sub status { shift->{status} }
 
 package Git::Wrapper::Log;
 {
-  $Git::Wrapper::Log::VERSION = '0.018';
+  $Git::Wrapper::Log::VERSION = '0.019';
 }
 
 sub new {
@@ -321,7 +321,7 @@ sub author { shift->attr->{author} }
 
 package Git::Wrapper::Statuses;
 {
-  $Git::Wrapper::Statuses::VERSION = '0.018';
+  $Git::Wrapper::Statuses::VERSION = '0.019';
 }
 
 sub new { return bless {} => shift }
@@ -350,7 +350,7 @@ sub is_dirty {
 
 package Git::Wrapper::Status;
 {
-  $Git::Wrapper::Status::VERSION = '0.018';
+  $Git::Wrapper::Status::VERSION = '0.019';
 }
 
 my %modes = (
@@ -396,7 +396,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 SYNOPSIS
 

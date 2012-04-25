@@ -56,7 +56,7 @@
          "web" : "http://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.018",
+   "version" : "0.019",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
@@ -207,7 +207,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Twitter",
             "name" : "Twitter",
-            "version" : "0.014"
+            "version" : "0.015"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",

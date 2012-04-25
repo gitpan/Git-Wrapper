@@ -10,6 +10,7 @@ README.mkdn
 dist.ini
 lib/Git/Wrapper.pm
 releases/Git-Wrapper-0.016.tar.gz
+releases/Git-Wrapper-0.018.tar.gz
 releases/Git-Wrapper-0.14.tar.gz
 t/00-load.t
 t/author-err.t

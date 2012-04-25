@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.019     2012-04-25 08:14:54 America/New_York
+
+        Skip 'git log --oneline' test on older gits without support for that option
+
 0.018     2012-04-22 15:30:43 America/New_York
 
         Misc doc clean ups and tweaks (John SJ Anderson)
