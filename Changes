@@ -1,5 +1,12 @@
 Revision history for Git-Wrapper
 
+0.020     2012-04-28 11:21:55 America/New_York
+
+        dist.ini tweaking:
+	    * Exclude archived releases and dist.ini from dist
+            * Don't ship README; only README.mkdn
+            * Set homepage and bugtracker URLs in META.yml
+
 0.019     2012-04-25 08:14:54 America/New_York
 
         Skip 'git log --oneline' test on older gits without support for that option
