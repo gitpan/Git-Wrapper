@@ -7,6 +7,11 @@ META.yml
 Makefile.PL
 README.mkdn
 lib/Git/Wrapper.pm
+lib/Git/Wrapper/Exception.pm
+lib/Git/Wrapper/File/RawModification.pm
+lib/Git/Wrapper/Log.pm
+lib/Git/Wrapper/Status.pm
+lib/Git/Wrapper/Statuses.pm
 t/00-load.t
 t/author-err.t
 t/basic.t

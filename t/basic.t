@@ -95,6 +95,15 @@ SKIP:
   is( @lines , 1 , 'one log entry' );
 }
 
+my @raw_log = $git->log({ raw => 1 });
+is(@raw_log, 1, 'one raw log entry');
+
+my $raw_log = $raw_log[0];
+my $excepted_mod = Git::Wrapper::File::RawModification->new(
+  "foo/bar","A",'000000','100644','0000000',"ce01362"
+);
+is_deeply($raw_log->modifications, $excepted_mod);
+
 SKIP: {
     # Test empty commit message
     IO::File->new(">" . File::Spec->catfile($dir, qw(second_commit)))->print("second_commit\n");
@@ -141,5 +150,13 @@ my ($new_branch) = grep {m/^\*/} $git->branch;
 $new_branch =~ s/^\*\s+|\s+$//g;
 
 is $new_branch, 'new_branch', 'new branch name is correct';
+
+my ($hash) = $git->hash_object({
+  no_filters => 1,
+  stdin      => 1,
+  -STDIN     => 'content to hash',
+});
+is $hash, '4b06c1f876b16951b37f4d6755010f901100f04e',
+  'passing content with -STDIN option';
 
 done_testing();

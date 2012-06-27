@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.020';
+  $Git::Wrapper::VERSION = '0.021';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -16,6 +16,11 @@ use IPC::Cmd        qw(can_run);
 use IPC::Open3      qw();
 use Sort::Versions;
 use Symbol;
+
+use Git::Wrapper::Exception;
+use Git::Wrapper::File::RawModification;
+use Git::Wrapper::Log;
+use Git::Wrapper::Statuses;
 
 my $GIT = ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 
@@ -57,6 +62,8 @@ sub RUN {
 
   my @cmd = $GIT;
 
+  my $stdin = delete $opt->{-STDIN};
+
   for (grep { /^-/ } keys %$opt) {
     (my $name = $_) =~ s/^-//;
 
@@ -87,11 +94,24 @@ sub RUN {
 
     my ($wtr, $rdr, $err);
 
+    local *TEMP;
+    if ($^O eq 'MSWin32' && defined $stdin) {
+      my $file = File::Temp->new;
+      $file->autoflush(1);
+      $file->print($stdin);
+      $file->seek(0,0);
+      open TEMP, '<&=', $file;
+      $wtr = '<&TEMP';
+      undef $stdin;
+    }
+
     $err = Symbol::gensym;
 
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
 
     my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
+    print $wtr $stdin
+      if defined $stdin;
 
     close $wtr;
     chomp(@out = <$rdr>);
@@ -181,6 +201,8 @@ sub log {
   $opt->{no_color} = 1;
   $opt->{pretty}   = 'medium';
 
+  my $raw = defined $opt->{raw} && $opt->{raw};
+
   my @out = $self->RUN(log => $opt, @_);
 
   my @logs;
@@ -211,6 +233,16 @@ sub log {
     }
 
     $current->message($message);
+
+    if ($raw) {
+      my @modifications;
+
+      while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{7})\.\.\. (\w{7})\.\.\. (\w{1})\t(.*)$/) {
+        push @modifications, Git::Wrapper::File::RawModification->new($6,$5,$1,$2,$3,$4);
+        shift @out;
+      }
+      $current->modifications(@modifications) if @modifications;
+    }
 
     push @logs, $current;
   }
@@ -270,122 +302,6 @@ sub status {
   return $statuses;
 }
 
-package Git::Wrapper::Exception;
-{
-  $Git::Wrapper::Exception::VERSION = '0.020';
-}
-
-sub new { my $class = shift; bless { @_ } => $class }
-
-use overload (
-  q("") => '_stringify',
-  fallback => 1,
-);
-
-sub _stringify {
-  my ($self) = @_;
-  my $error = $self->error;
-  return $error if $error =~ /\S/;
-  return "git exited non-zero but had no output to stderr";
-}
-
-sub output { join "", map { "$_\n" } @{ shift->{output} } }
-sub error  { join "", map { "$_\n" } @{ shift->{error} } }
-sub status { shift->{status} }
-
-package Git::Wrapper::Log;
-{
-  $Git::Wrapper::Log::VERSION = '0.020';
-}
-
-sub new {
-  my ($class, $id, %arg) = @_;
-  return bless {
-    id   => $id,
-    attr => {},
-    %arg,
-  } => $class;
-}
-
-sub id { shift->{id} }
-
-sub attr { shift->{attr} }
-
-sub message { @_ > 1 ? ($_[0]->{message} = $_[1]) : $_[0]->{message} }
-
-sub date { shift->attr->{date} }
-
-sub author { shift->attr->{author} }
-
-1;
-
-package Git::Wrapper::Statuses;
-{
-  $Git::Wrapper::Statuses::VERSION = '0.020';
-}
-
-sub new { return bless {} => shift }
-
-sub add {
-  my ($self, $type, $mode, $from, $to) = @_;
-
-  my $status = Git::Wrapper::Status->new($mode, $from, $to);
-
-  push @{ $self->{ $type } }, $status;
-}
-
-sub get {
-  my ($self, $type) = @_;
-
-  return @{ defined $self->{$type} ? $self->{$type} : [] };
-}
-
-sub is_dirty {
-  my( $self ) = @_;
-
-  return keys %$self ? 1 : 0;
-}
-
-1;
-
-package Git::Wrapper::Status;
-{
-  $Git::Wrapper::Status::VERSION = '0.020';
-}
-
-my %modes = (
-  M   => 'modified',
-  A   => 'added',
-  D   => 'deleted',
-  R   => 'renamed',
-  C   => 'copied',
-  U   => 'conflict',
-  '?' => 'unknown',
-  DD  => 'both deleted',
-  AA  => 'both added',
-  UU  => 'both modified',
-  AU  => 'added by us',
-  DU  => 'deleted by us',
-  UA  => 'added by them',
-  UD  => 'deleted by them',
-);
-
-sub new {
-  my ($class, $mode, $from, $to) = @_;
-
-  return bless {
-    mode => $mode,
-    from => $from,
-    to   => $to,
-  } => $class;
-}
-
-sub mode { $modes{ shift->{mode} } }
-
-sub from { shift->{from} }
-
-sub to   { defined( $_[0]->{to} ) ? $_[0]->{to} : '' }
-
 
 
 =pod
@@ -396,7 +312,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.020
+version 0.021
 
 =head1 SYNOPSIS
 
@@ -428,6 +344,10 @@ explicit '0' value to an option (for example, to have the same effect as
 C<--abrrev=0> on the command line), you should pass it with a leading space, like so:
 
   $git->describe({ abbrev => ' 0' };
+
+To pass content via STDIN, use the -STDIN option:
+
+  $git->hash_object({ stdin => 1, -STDIN => 'content to hash' });
 
 Output is available as an array of lines, each chomped.
 

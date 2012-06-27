@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.020
+version 0.021
 
 # SYNOPSIS
 
@@ -36,6 +36,10 @@ explicit '0' value to an option (for example, to have the same effect as
 `--abrrev=0` on the command line), you should pass it with a leading space, like so:
 
     $git->describe({ abbrev => ' 0' };
+
+To pass content via STDIN, use the -STDIN option:
+
+    $git->hash_object({ stdin => 1, -STDIN => 'content to hash' });
 
 Output is available as an array of lines, each chomped.
 
