@@ -59,7 +59,7 @@
          "web" : "http://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.021",
+   "version" : "0.022",
    "x_Dist_Zilla" : {
       "plugins" : [
          {

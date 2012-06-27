@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.022     2012-06-27 17:00:46 America/New_York
+
+        Unset GIT_PAGER_IN_USE env var to stop any ANSI colorization (Karen Etheridge)
+
 0.021     2012-06-27 16:48:42 America/New_York
         Splitted up classes inside Git::Wrapper to individual package files (Torsten Raudssus)
         Added the handling of ->log({ raw => 1 }) to get the file modifications (Torsten Raudssus)

@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper::Status;
 {
-  $Git::Wrapper::Status::VERSION = '0.021';
+  $Git::Wrapper::Status::VERSION = '0.022';
 }
 # ABSTRACT: A specific status information in the Git
 
@@ -53,7 +53,7 @@ Git::Wrapper::Status - A specific status information in the Git
 
 =head1 VERSION
 
-version 0.021
+version 0.022
 
 =head1 METHODS
 

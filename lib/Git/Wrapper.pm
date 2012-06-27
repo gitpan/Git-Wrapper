@@ -4,11 +4,15 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.021';
+  $Git::Wrapper::VERSION = '0.022';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
 our $DEBUG=0;
+
+# Prevent ANSI color with extreme prejudice
+# https://github.com/genehack/Git-Wrapper/issues/13
+$ENV{GIT_PAGER_IN_USE} = undef;
 
 use File::pushd;
 use File::Temp;
@@ -312,7 +316,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.021
+version 0.022
 
 =head1 SYNOPSIS
 
