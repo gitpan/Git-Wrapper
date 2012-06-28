@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.022';
+  $Git::Wrapper::VERSION = '0.023';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -254,6 +254,14 @@ sub log {
   return @logs;
 }
 
+sub supports_hash_object_filters {
+  my $self = shift;
+
+  # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
+  return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
+  return 1;
+}
+
 sub supports_log_raw_dates {
   my $self = shift;
 
@@ -316,7 +324,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.022
+version 0.023
 
 =head1 SYNOPSIS
 
@@ -418,9 +426,12 @@ binary in the current $PATH.
 
 =head2 supports_log_raw_dates
 
+=head2 supports_hash_object_filters
+
 These methods return a true or false value (1 or 0) indicating whether the git
 binary being used has support for these options. (The '--porcelain' option on
-'git status' and the '--date=raw' option on 'git log', respectively.)
+'git status', the '--date=raw' option on 'git log', and the '--no-filters'
+option on 'git hash-object' respectively.)
 
 These are primarily for use in this distribution's test suite, but may also be
 useful when writing code using Git::Wrapper that might be run with different

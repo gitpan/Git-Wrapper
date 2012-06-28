@@ -12,13 +12,6 @@ use Sort::Versions;
 use Test::Deep;
 use Test::Exception;
 
-unless ( Git::Wrapper->has_git_in_path ) {
-  diag 'EXITING TESTS due to lack of installed git in $PATH.';
-  SKIP: {skip 'no git in $PATH',1;}
-  done_testing();
-  exit();
-}
-
 my $dir = tempdir(CLEANUP => 1);
 
 my $git = Git::Wrapper->new($dir);
@@ -151,12 +144,16 @@ $new_branch =~ s/^\*\s+|\s+$//g;
 
 is $new_branch, 'new_branch', 'new branch name is correct';
 
-my ($hash) = $git->hash_object({
-  no_filters => 1,
-  stdin      => 1,
-  -STDIN     => 'content to hash',
-});
-is $hash, '4b06c1f876b16951b37f4d6755010f901100f04e',
-  'passing content with -STDIN option';
+SKIP: {
+  skip 'testing old git without no-filters' , 1 unless $git->supports_hash_object_filters;
+
+  my ($hash) = $git->hash_object({
+    no_filters => 1,
+    stdin      => 1,
+    -STDIN     => 'content to hash',
+  });
+  is $hash, '4b06c1f876b16951b37f4d6755010f901100f04e',
+    'passing content with -STDIN option';
+}
 
 done_testing();

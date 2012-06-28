@@ -1,6 +1,6 @@
 package Git::Wrapper::Statuses;
 {
-  $Git::Wrapper::Statuses::VERSION = '0.022';
+  $Git::Wrapper::Statuses::VERSION = '0.023';
 }
 # ABSTRACT: 
 
@@ -44,7 +44,7 @@ Git::Wrapper::Statuses -
 
 =head1 VERSION
 
-version 0.022
+version 0.023
 
 =head1 METHODS
 

@@ -37,13 +37,15 @@
       },
       "test" : {
          "requires" : {
+            "Env::Path" : "0",
             "File::Path" : "0",
             "File::Spec" : "0",
             "IO::File" : "0",
             "POSIX" : "0",
             "Test::Deep" : "0",
             "Test::Exception" : "0",
-            "Test::More" : "0"
+            "Test::More" : "0",
+            "Test::Most" : "0"
          }
       }
    },
@@ -59,7 +61,7 @@
          "web" : "http://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.022",
+   "version" : "0.023",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
@@ -130,7 +132,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Git::NextVersion",
             "name" : "Git::NextVersion",
-            "version" : "1.121010"
+            "version" : "1.121800"
          },
          {
             "class" : "Dist::Zilla::Plugin::AutoPrereqs",
@@ -173,6 +175,11 @@
             "version" : "4.300020"
          },
          {
+            "class" : "Dist::Zilla::Plugin::PodCoverageTests",
+            "name" : "PodCoverageTests",
+            "version" : "4.300020"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::PodWeaver",
             "name" : "PodWeaver",
             "version" : "3.101641"
@@ -195,17 +202,22 @@
          {
             "class" : "Dist::Zilla::Plugin::Git::Commit",
             "name" : "Git::Commit",
-            "version" : "1.121010"
+            "version" : "1.121800"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Tag",
             "name" : "Git::Tag",
-            "version" : "1.121010"
+            "version" : "1.121800"
          },
          {
             "class" : "Dist::Zilla::Plugin::Twitter",
             "name" : "Twitter",
             "version" : "0.016"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::RequiresExternal",
+            "name" : "RequiresExternal",
+            "version" : "1.004"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
