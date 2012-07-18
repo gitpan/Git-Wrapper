@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.024
+version 0.025
 
 # SYNOPSIS
 

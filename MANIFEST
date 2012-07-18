@@ -13,8 +13,8 @@ lib/Git/Wrapper/Log.pm
 lib/Git/Wrapper/Status.pm
 lib/Git/Wrapper/Statuses.pm
 t/00-load.t
+t/000-requires_external.t
 t/author-err.t
 t/basic.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
-t/requires_external.t

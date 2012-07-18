@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.025     2012-07-18 12:38:05 America/New_York
+
+        Add 'fatal' option for RequiresExternal dzil plugin
+
 0.024     2012-07-18 12:32:17 America/New_York
 
         make sure no line ending munging is done to get consistent
