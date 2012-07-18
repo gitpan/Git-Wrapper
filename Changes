@@ -1,5 +1,11 @@
 Revision history for Git-Wrapper
 
+0.024     2012-07-18 12:32:17 America/New_York
+
+        make sure no line ending munging is done to get consistent
+        hashing in test (Graham Knop)
+
+
 0.023     2012-06-28 09:22:13 America/New_York
 
         Skip hash test on git versions before 1.6.1 (Eduardo Ariño de la Rubia)

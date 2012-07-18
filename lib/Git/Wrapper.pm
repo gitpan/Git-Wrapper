@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.023';
+  $Git::Wrapper::VERSION = '0.024';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -324,7 +324,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.023
+version 0.024
 
 =head1 SYNOPSIS
 
