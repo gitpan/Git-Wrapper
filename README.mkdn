@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.025
+version 0.026
 
 # SYNOPSIS
 
@@ -73,6 +73,14 @@ The exception stringifies to the error message.
 ## version
 
     my $version = $git->version; # 1.6.1.4.8.15.16.23.42
+
+## branch
+
+    my @branches = $git->branch;
+
+This command intentionally disables ANSI color highlighting in the output. If
+you want ANSI color highlighting, you'll need to bypass via the RUN() method
+(see below).
 
 ## log
 

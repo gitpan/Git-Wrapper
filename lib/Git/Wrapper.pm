@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.025';
+  $Git::Wrapper::VERSION = '0.026';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -12,7 +12,7 @@ our $DEBUG=0;
 
 # Prevent ANSI color with extreme prejudice
 # https://github.com/genehack/Git-Wrapper/issues/13
-$ENV{GIT_PAGER_IN_USE} = undef;
+delete $ENV{GIT_PAGER_IN_USE};
 
 use File::pushd;
 use File::Temp;
@@ -198,12 +198,22 @@ sub version {
   return $version;
 }
 
+sub branch {
+  my $self = shift;
+
+  my $opt = ref $_[0] eq 'HASH' ? shift : {};
+  $opt->{color} = 'never';
+
+  return $self->RUN(branch => $opt,@_);
+}
+
 sub log {
   my $self = shift;
 
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
-  $opt->{no_color} = 1;
-  $opt->{pretty}   = 'medium';
+  $opt->{no_color}         = 1;
+  $opt->{pretty}           = 'medium';
+  $opt->{no_abbrev_commit} = 1;
 
   my $raw = defined $opt->{raw} && $opt->{raw};
 
@@ -324,7 +334,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.025
+version 0.026
 
 =head1 SYNOPSIS
 
@@ -397,6 +407,14 @@ The exception stringifies to the error message.
 =head2 version
 
   my $version = $git->version; # 1.6.1.4.8.15.16.23.42
+
+=head2 branch
+
+  my @branches = $git->branch;
+
+This command intentionally disables ANSI color highlighting in the output. If
+you want ANSI color highlighting, you'll need to bypass via the RUN() method
+(see below).
 
 =head2 log
 
