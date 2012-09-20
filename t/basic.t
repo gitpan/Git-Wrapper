@@ -79,12 +79,18 @@ SKIP: {
   cmp_ok(( $log_date - $time ), '<=', 5, 'date');
 }
 
-$git->config( 'log.abbrevCommit', 'true' );
+SKIP:
+{
+  skip 'testing old git without no abbrev commit support' , 1
+    unless $git->supports_log_no_abbrev_commit;
 
-@log = $git->log( $args );
+  $git->config( 'log.abbrevCommit', 'true' );
 
-$log = $log[0];
-is($log->id, (split /\s/, $rev_list[0])[0], 'id');
+  @log = $git->log( $args );
+
+  $log = $log[0];
+  is($log->id, (split /\s/, $rev_list[0])[0], 'id');
+}
 
 SKIP:
 {

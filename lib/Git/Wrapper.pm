@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.026';
+  $Git::Wrapper::VERSION = '0.027';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -213,7 +213,9 @@ sub log {
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{no_color}         = 1;
   $opt->{pretty}           = 'medium';
-  $opt->{no_abbrev_commit} = 1;
+
+  $opt->{no_abbrev_commit} = 1
+    if $self->supports_log_no_abbrev_commit;
 
   my $raw = defined $opt->{raw} && $opt->{raw};
 
@@ -270,6 +272,13 @@ sub supports_hash_object_filters {
   # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
   return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
   return 1;
+}
+
+sub supports_log_no_abbrev_commit {
+  my $self = shift;
+
+  # The '--no-abbrev-commit' option to 'git log' was added in version 1.7.6
+  return ( versioncmp( $self->version , '1.7.6' ) eq -1 ) ? 0 : 1;
 }
 
 sub supports_log_raw_dates {
@@ -334,7 +343,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.026
+version 0.027
 
 =head1 SYNOPSIS
 
@@ -442,14 +451,16 @@ binary in the current $PATH.
 
 =head2 supports_status_porcelain
 
+=head2 supports_log_no_abbrev_commit
+
 =head2 supports_log_raw_dates
 
 =head2 supports_hash_object_filters
 
 These methods return a true or false value (1 or 0) indicating whether the git
 binary being used has support for these options. (The '--porcelain' option on
-'git status', the '--date=raw' option on 'git log', and the '--no-filters'
-option on 'git hash-object' respectively.)
+'git status', the '--no-abbrev-commit' and '--date=raw' options on 'git log',
+and the '--no-filters' option on 'git hash-object' respectively.)
 
 These are primarily for use in this distribution's test suite, but may also be
 useful when writing code using Git::Wrapper that might be run with different
