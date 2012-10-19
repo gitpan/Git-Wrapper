@@ -1,6 +1,6 @@
 package Git::Wrapper::File::RawModification;
 {
-  $Git::Wrapper::File::RawModification::VERSION = '0.027';
+  $Git::Wrapper::File::RawModification::VERSION = '0.028';
 }
 # ABSTRACT: Modification of a file in a commit
 
@@ -31,8 +31,8 @@ sub blob_to    { shift->{blob_to} }
 
 1;
 
-
 __END__
+
 =pod
 
 =head1 NAME
@@ -41,7 +41,7 @@ Git::Wrapper::File::RawModification - Modification of a file in a commit
 
 =head1 VERSION
 
-version 0.027
+version 0.028
 
 =head1 METHODS
 
@@ -100,4 +100,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

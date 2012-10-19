@@ -1,6 +1,6 @@
 package Git::Wrapper::Exception;
 {
-  $Git::Wrapper::Exception::VERSION = '0.027';
+  $Git::Wrapper::Exception::VERSION = '0.028';
 }
 # ABSTRACT: Exception class for Git::Wrapper
 
@@ -28,8 +28,8 @@ sub status { shift->{status} }
 
 1;
 
-
 __END__
+
 =pod
 
 =head1 NAME
@@ -38,7 +38,7 @@ Git::Wrapper::Exception - Exception class for Git::Wrapper
 
 =head1 VERSION
 
-version 0.027
+version 0.028
 
 =head1 METHODS
 
@@ -89,4 +89,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

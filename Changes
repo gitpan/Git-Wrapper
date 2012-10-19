@@ -1,6 +1,12 @@
 Revision history for Git-Wrapper
 
+0.028     2012-10-19 06:55:15 America/Los_Angeles
+
+        Fix $git->branch compatibility with git < 1.7.1 by tweaking color calling convention (Vyacheslav Matyukhin)
+    
 0.027     2012-09-19 22:32:52 America/New_York
+
+        Disable --no-abbrev-commit when git doesn't support it
 
 0.026     2012-09-17 20:52:45 America/Los_Angeles
 

@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.027';
+  $Git::Wrapper::VERSION = '0.028';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -202,7 +202,7 @@ sub branch {
   my $self = shift;
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
-  $opt->{color} = 'never';
+  $opt->{no_color} = 1;
 
   return $self->RUN(branch => $opt,@_);
 }
@@ -333,7 +333,7 @@ sub status {
   return $statuses;
 }
 
-
+__END__
 
 =pod
 
@@ -343,7 +343,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.027
+version 0.028
 
 =head1 SYNOPSIS
 
@@ -687,7 +687,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
