@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.028
+version 0.028\_95
 
 # SYNOPSIS
 
@@ -12,6 +12,12 @@ version 0.028
 
     $git->commit(...)
     print $_->message for $git->log;
+
+    # specify which git binary to use
+    my $git = Git::Wrapper->new({
+      dir        => '/var/foo ,
+      git_binary => '/path/to/git/bin/git' ,
+    });
 
 # DESCRIPTION
 
@@ -50,21 +56,29 @@ thrown.  It has three useful methods:
 
 - error
 
-error message
+    error message
 
 - output
 
-normal output, as a single string
+    normal output, as a single string
 
 - status
 
-the exit status
+    the exit status
 
 The exception stringifies to the error message.
 
 ## new
 
     my $git = Git::Wrapper->new($dir);
+    my $git = Git::Wrapper->new({ dir => $dir , git_binary => '/path/to/git' });
+
+    # To force the git binary location
+    my $git = Git::Wrapper->new($dir, 'git_binary' => '/usr/local/bin/git');
+
+## git
+
+    print $git->git; # /path/to/git/binary/being/used
 
 ## dir
 
@@ -262,8 +276,10 @@ Google Code project page: [http://code.google.com/p/msysgit/downloads](http://co
 
 # ENVIRONMENT VARIABLES
 
-Git::Wrapper normally uses the first 'git' binary in your path, but if the
-GIT\_WRAPPER\_GIT environment variable is set, that value will be used instead.
+Git::Wrapper normally uses the first 'git' binary in your path. The original
+override provided to change this was by setting the GIT\_WRAPPER\_GIT environment
+variable. Now that object creation accepts an override, you are encouraged to
+instead pass the binary location (git\_binary) to new on object creation.
 
 # SEE ALSO
 

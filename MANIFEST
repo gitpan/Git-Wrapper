@@ -16,5 +16,6 @@ t/00-load.t
 t/000-requires_external.t
 t/author-err.t
 t/basic.t
+t/git_binary.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t

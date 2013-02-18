@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.028';
+  $Git::Wrapper::VERSION = '0.028_95';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -26,12 +26,27 @@ use Git::Wrapper::File::RawModification;
 use Git::Wrapper::Log;
 use Git::Wrapper::Statuses;
 
-my $GIT = ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
-
 sub new {
-  my ($class, $arg, %opt) = @_;
+  my $class = shift;
 
-  my $self = bless { dir => $arg, %opt } => $class;
+  # three calling conventions
+  # 1: my $gw = Git::Wrapper->new( $dir )
+  # 2: my $gw = Git::Wrapper->new( $dir , %options )
+  # 3: my $gw = Git::Wrapper->new({ dir => $dir , %options });
+
+  my $args;
+
+  if ( scalar @_ == 1 ) {
+    my $arg = shift;
+    if ( ! ref $arg ) { $args = { dir => $arg } }
+    elsif ( ref $arg eq 'HASH' ) { $args = $arg }
+  }
+  else {
+    my( $dir , %opts ) = @_;
+    $args = { dir => $dir , %opts }
+  }
+
+  my $self = bless $args => $class;
 
   die "usage: $class->new(\$dir)" unless $self->dir;
 
@@ -41,6 +56,14 @@ sub new {
 sub has_git_in_path { can_run('git') }
 
 sub dir { shift->{dir} }
+
+sub git {
+  my $self = shift;
+
+  return $self->{git_binary} if defined $self->{git_binary};
+
+  return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
+}
 
 sub ERR { shift->{err} }
 sub OUT { shift->{out} }
@@ -64,7 +87,7 @@ sub RUN {
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
 
-  my @cmd = $GIT;
+  my @cmd = $self->git;
 
   my $stdin = delete $opt->{-STDIN};
 
@@ -343,7 +366,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.028
+version 0.028_95
 
 =head1 SYNOPSIS
 
@@ -351,6 +374,12 @@ version 0.028
 
   $git->commit(...)
   print $_->message for $git->log;
+
+  # specify which git binary to use
+  my $git = Git::Wrapper->new({
+    dir        => '/var/foo ,
+    git_binary => '/path/to/git/bin/git' ,
+  });
 
 =head1 DESCRIPTION
 
@@ -408,6 +437,14 @@ The exception stringifies to the error message.
 =head2 new
 
   my $git = Git::Wrapper->new($dir);
+  my $git = Git::Wrapper->new({ dir => $dir , git_binary => '/path/to/git' });
+
+  # To force the git binary location
+  my $git = Git::Wrapper->new($dir, 'git_binary' => '/usr/local/bin/git');
+
+=head2 git
+
+  print $git->git; # /path/to/git/binary/being/used
 
 =head2 dir
 
@@ -638,8 +675,10 @@ Google Code project page: L<http://code.google.com/p/msysgit/downloads>
 
 =head1 ENVIRONMENT VARIABLES
 
-Git::Wrapper normally uses the first 'git' binary in your path, but if the
-GIT_WRAPPER_GIT environment variable is set, that value will be used instead.
+Git::Wrapper normally uses the first 'git' binary in your path. The original
+override provided to change this was by setting the GIT_WRAPPER_GIT environment
+variable. Now that object creation accepts an override, you are encouraged to
+instead pass the binary location (git_binary) to new on object creation.
 
 =head1 SEE ALSO
 
