@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.028_95';
+  $Git::Wrapper::VERSION = '0.028_96';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -53,29 +53,19 @@ sub new {
   return $self;
 }
 
-sub has_git_in_path { can_run('git') }
-
-sub dir { shift->{dir} }
-
-sub git {
+sub AUTOLOAD {
   my $self = shift;
 
-  return $self->{git_binary} if defined $self->{git_binary};
+  (my $meth = our $AUTOLOAD) =~ s/.+:://;
+  return if $meth eq 'DESTROY';
 
-  return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
+  $meth =~ tr/_/-/;
+
+  return $self->RUN($meth, @_);
 }
 
 sub ERR { shift->{err} }
 sub OUT { shift->{out} }
-
-sub _opt {
-  my $name = shift;
-  $name =~ tr/_/-/;
-  return length($name) == 1
-    ? "-$name"
-    : "--$name"
-  ;
-}
 
 sub RUN {
   my $self = shift;
@@ -85,34 +75,9 @@ sub RUN {
 
   my $cmd = shift;
 
-  my $opt = ref $_[0] eq 'HASH' ? shift : {};
+  my( $parts , $stdin ) = _parse_args( $cmd , @_ );
 
-  my @cmd = $self->git;
-
-  my $stdin = delete $opt->{-STDIN};
-
-  for (grep { /^-/ } keys %$opt) {
-    (my $name = $_) =~ s/^-//;
-
-    my $val = delete $opt->{$_};
-    next if $val eq '0';
-
-    push @cmd, _opt($name) . _munge_val($name, $val);
-  }
-
-  push @cmd, $cmd;
-
-  for my $name (keys %$opt) {
-    my $val = delete $opt->{$name};
-    next if $val eq '0';
-
-    ( $name, $val ) = $self->_message_tempfile( $val )
-      if $self->_win32_multiline_commit_msg( $cmd, $name, $val );
-
-    push @cmd,  _opt($name) . _munge_val($name, $val);
-  }
-
-  push @cmd, @_;
+  my @cmd = ( $self->git , @$parts );
 
   my( @out , @err );
 
@@ -172,55 +137,6 @@ sub RUN {
   return @out;
 }
 
-sub _munge_val {
-  my( $name , $val ) = @_;
-
-  return $val eq '1'       ? ""
-    : length($name) == 1 ? $val
-    :                      "=$val";
-}
-
-sub _win32_multiline_commit_msg {
-  my ( $self, $cmd, $name, $val ) = @_;
-
-  return 0 if $^O ne "MSWin32";
-  return 0 if $cmd ne "commit";
-  return 0 if $name ne "m" and $name ne "message";
-  return 0 if $val !~ /\n/;
-
-  return 1;
-}
-
-sub _message_tempfile {
-  my ( $self, $message ) = @_;
-
-  my $tmp = File::Temp->new( UNLINK => 0 );
-  $tmp->print( $message );
-
-  return ( "file", '"'.$tmp->filename.'"' );
-}
-
-sub AUTOLOAD {
-  my $self = shift;
-
-  (my $meth = our $AUTOLOAD) =~ s/.+:://;
-  return if $meth eq 'DESTROY';
-
-  $meth =~ tr/_/-/;
-
-  return $self->RUN($meth, @_);
-}
-
-sub version {
-  my $self = shift;
-
-  my ($version) = $self->RUN('version');
-
-  $version =~ s/^git version //;
-
-  return $version;
-}
-
 sub branch {
   my $self = shift;
 
@@ -229,6 +145,18 @@ sub branch {
 
   return $self->RUN(branch => $opt,@_);
 }
+
+sub dir { shift->{dir} }
+
+sub git {
+  my $self = shift;
+
+  return $self->{git_binary} if defined $self->{git_binary};
+
+  return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
+}
+
+sub has_git_in_path { can_run('git') }
 
 sub log {
   my $self = shift;
@@ -250,11 +178,11 @@ sub log {
 
     my $current = Git::Wrapper::Log->new($1);
 
-    $line = shift @out; # next line;
+    $line = shift @out;         # next line;
 
     while ($line =~ /^(\S+):\s+(.+)$/) {
       $current->attr->{lc $1} = $2;
-      $line = shift @out; # next line;
+      $line = shift @out;       # next line;
     }
 
     die "no blank line separating head from message" if $line;
@@ -264,9 +192,9 @@ sub log {
     my $message = '';
     while (
       @out
-      and $out[0] !~ /^commit (\S+)/
-      and length($line = shift @out)
-    ) {
+        and $out[0] !~ /^commit (\S+)/
+          and length($line = shift @out)
+        ) {
       $line =~ s/^$initial_indent//; # strip just the indenting added by git
       $message .= "$line\n";
     }
@@ -287,37 +215,6 @@ sub log {
   }
 
   return @logs;
-}
-
-sub supports_hash_object_filters {
-  my $self = shift;
-
-  # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
-  return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
-  return 1;
-}
-
-sub supports_log_no_abbrev_commit {
-  my $self = shift;
-
-  # The '--no-abbrev-commit' option to 'git log' was added in version 1.7.6
-  return ( versioncmp( $self->version , '1.7.6' ) eq -1 ) ? 0 : 1;
-}
-
-sub supports_log_raw_dates {
-  my $self = shift;
-
-  # The '--date=raw' option to 'git log' was added in version 1.6.2
-  return 0 if ( versioncmp( $self->version , '1.6.2' ) eq -1 );
-  return 1;
-}
-
-sub supports_status_porcelain {
-  my $self = shift;
-
-  # The '--porcelain' option to git status was added in version 1.7.0
-  return 0 if ( versioncmp( $self->version , '1.7' ) eq -1 );
-  return 1;
 }
 
 my %STATUS_CONFLICTS = map { $_ => 1 } qw<DD AU UD UA DU AA UU>;
@@ -356,6 +253,120 @@ sub status {
   return $statuses;
 }
 
+sub supports_hash_object_filters {
+  my $self = shift;
+
+  # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
+  return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
+  return 1;
+}
+
+sub supports_log_no_abbrev_commit {
+  my $self = shift;
+
+  # The '--no-abbrev-commit' option to 'git log' was added in version 1.7.6
+  return ( versioncmp( $self->version , '1.7.6' ) eq -1 ) ? 0 : 1;
+}
+
+sub supports_log_raw_dates {
+  my $self = shift;
+
+  # The '--date=raw' option to 'git log' was added in version 1.6.2
+  return 0 if ( versioncmp( $self->version , '1.6.2' ) eq -1 );
+  return 1;
+}
+
+sub supports_status_porcelain {
+  my $self = shift;
+
+  # The '--porcelain' option to git status was added in version 1.7.0
+  return 0 if ( versioncmp( $self->version , '1.7' ) eq -1 );
+  return 1;
+}
+
+sub version {
+  my $self = shift;
+
+  my ($version) = $self->RUN('version');
+
+  $version =~ s/^git version //;
+
+  return $version;
+}
+
+sub _message_tempfile {
+  my ( $message ) = @_;
+
+  my $tmp = File::Temp->new( UNLINK => 0 );
+  $tmp->print( $message );
+
+  return ( "file", '"'.$tmp->filename.'"' );
+}
+
+sub _munge_val {
+  my( $name , $val ) = @_;
+
+  return $val eq '1'       ? ""
+    : length($name) == 1 ? $val
+      :                      "=$val";
+}
+
+sub _opt {
+  my $name = shift;
+  $name =~ tr/_/-/;
+  return length($name) == 1
+    ? "-$name"
+      : "--$name"
+        ;
+}
+
+sub _parse_args {
+  my $cmd = shift;
+  die "initial argument must not be a reference\n"
+    if ref $cmd;
+
+  my( $stdin , @pre_cmd , @post_cmd );
+
+  foreach ( @_ ) {
+    if ( ref $_ eq 'HASH' ) {
+      $stdin = delete $_->{-STDIN}
+        if exists $_->{-STDIN};
+
+      for my $name ( keys %$_ ) {
+        my $val = delete $_->{$name};
+        next if $val eq '0';
+
+        if ( $name =~ s/^-// ) {
+          push @pre_cmd , _opt( $name ) . _munge_val( $name , $val );
+        }
+        else {
+          ( $name, $val ) = _message_tempfile( $val )
+            if _win32_multiline_commit_msg( $cmd, $name, $val );
+
+          push @post_cmd , _opt( $name ) . _munge_val( $name , $val );
+        }
+      }
+    }
+    elsif ( ref $_ ) {
+      die "Git::Wrapper command arguments must be plain scalars or hashrefs.\n";
+    }
+    else { push @post_cmd , $_; }
+  }
+
+  return( [ @pre_cmd , $cmd , @post_cmd ] , $stdin );
+}
+
+sub _win32_multiline_commit_msg {
+  my ( $cmd, $name, $val ) = @_;
+
+  return 0 if $^O ne "MSWin32";
+  return 0 if $cmd ne "commit";
+  return 0 if $name ne "m" and $name ne "message";
+  return 0 if $val !~ /\n/;
+
+  return 1;
+}
+
 __END__
 
 =pod
@@ -366,7 +377,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.028_95
+version 0.028_96
 
 =head1 SYNOPSIS
 
@@ -391,6 +402,8 @@ argument passing, instead of CLI-style C<--options> as L<Git> does.
 Except as documented, every git subcommand is available as a method on a
 Git::Wrapper object.  Replace any hyphens in the git command with underscores.
 
+#FIXME write this to reflect new parsing strategy
+
 The first argument should be a hashref containing options and their values.
 Boolean options are either true (included) or false (excluded).  The remaining
 arguments are passed as ordinary command arguments.
@@ -398,6 +411,17 @@ arguments are passed as ordinary command arguments.
   $git->commit({ all => 1, message => "stuff" });
 
   $git->checkout("mybranch");
+
+I<N.b.> Options that are given with a leading '-' (with the exception of
+special options noted below) are applied as arguments to the C<git> command
+itself; options without a leading '-' are applied as arguments to the
+sub-command. For example:
+
+  $git->command({ -foo => 1 , bar => 2 });
+
+invokes the command line
+
+  git --foo=1 command --bar=2
 
 I<N.b.> Because of the way arguments are parsed, should you need to pass an
 explicit '0' value to an option (for example, to have the same effect as

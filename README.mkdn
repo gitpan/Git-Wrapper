@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.028\_95
+version 0.028\_96
 
 # SYNOPSIS
 
@@ -29,6 +29,8 @@ argument passing, instead of CLI-style `--options` as [Git](http://search.cpan.o
 Except as documented, every git subcommand is available as a method on a
 Git::Wrapper object.  Replace any hyphens in the git command with underscores.
 
+\#FIXME write this to reflect new parsing strategy
+
 The first argument should be a hashref containing options and their values.
 Boolean options are either true (included) or false (excluded).  The remaining
 arguments are passed as ordinary command arguments.
@@ -36,6 +38,17 @@ arguments are passed as ordinary command arguments.
     $git->commit({ all => 1, message => "stuff" });
 
     $git->checkout("mybranch");
+
+_N.b._ Options that are given with a leading '-' (with the exception of
+special options noted below) are applied as arguments to the `git` command
+itself; options without a leading '-' are applied as arguments to the
+sub-command. For example:
+
+    $git->command({ -foo => 1 , bar => 2 });
+
+invokes the command line
+
+    git --foo=1 command --bar=2
 
 _N.b._ Because of the way arguments are parsed, should you need to pass an
 explicit '0' value to an option (for example, to have the same effect as

@@ -68,7 +68,7 @@
          "web" : "https://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.028_95",
+   "version" : "0.028_96",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.016000"

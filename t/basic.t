@@ -16,9 +16,15 @@ my $dir = tempdir(CLEANUP => 1);
 
 my $git = Git::Wrapper->new($dir);
 
-diag( "Testing git version: " . $git->version );
+my $version = $git->version;
+if ( versioncmp( $git->version , '1.5.0') eq -1 ) {
+  plan skip_all =>
+    "Git prior to v1.5.0 doesn't support 'config' subcmd which we need for this test."
+}
 
-$git->init;
+diag( "Testing git version: " . $version );
+
+$git->init; # 'git init' also added in v1.5.0 so we're safe
 
 $git->config( 'user.name'  , 'Test User'        );
 $git->config( 'user.email' , 'test@example.com' );
