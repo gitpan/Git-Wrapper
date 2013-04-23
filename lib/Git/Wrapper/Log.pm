@@ -1,6 +1,6 @@
 package Git::Wrapper::Log;
 {
-  $Git::Wrapper::Log::VERSION = '0.028_96';
+  $Git::Wrapper::Log::VERSION = '0.028_97';
 }
 # ABSTRACT: Log line of the Git
 
@@ -49,7 +49,7 @@ Git::Wrapper::Log - Log line of the Git
 
 =head1 VERSION
 
-version 0.028_96
+version 0.028_97
 
 =head1 METHODS
 

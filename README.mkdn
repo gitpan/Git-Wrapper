@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.028\_96
+version 0.028\_97
 
 # SYNOPSIS
 
@@ -24,20 +24,40 @@ version 0.028\_96
 Git::Wrapper provides an API for git(7) that uses Perl data structures for
 argument passing, instead of CLI-style `--options` as [Git](http://search.cpan.org/perldoc?Git) does.
 
-# METHODS
+# METHOD INVOCATION
 
 Except as documented, every git subcommand is available as a method on a
-Git::Wrapper object.  Replace any hyphens in the git command with underscores.
+Git::Wrapper object. Replace any hyphens in the git command with underscores
+(for example, 'git init-db' would become `$git-`init\_db>).
 
-\#FIXME write this to reflect new parsing strategy
+## Method Arguments
 
-The first argument should be a hashref containing options and their values.
-Boolean options are either true (included) or false (excluded).  The remaining
-arguments are passed as ordinary command arguments.
+Methods accept a combination of hashrefs and scalars, which is used to build
+the command used to invoke git. Arguments passed in hashrefs will be
+automatically parsed into option pairs, but the ordering of these in the
+resulting shell command is not guarenteed (with the exceptino of options with
+a leading '-'; see below). Options that are passed as plain scalars will
+retain their order. Some examples may help clarify. This code:
 
-    $git->commit({ all => 1, message => "stuff" });
+    $git->commit({ message => "stuff" , all => 1 });
 
-    $git->checkout("mybranch");
+may produce this shell command:
+
+    git commit --all --message="stuff"
+
+This code, however:
+
+    $git->commit(qw/ --message "stuff" / , { all => 1 });
+
+will always produce this shell command:
+
+    git commit --message "stuff" --all
+
+In most cases, this exact control over argument ordering is not needed and
+simply passing all options as part of a hashref, and all other options as
+additional list arguments, will be sufficient. In some cases, however, the
+ordering of options to particular git sub-commands is significant, resulting
+in the need for this level of control.
 
 _N.b._ Options that are given with a leading '-' (with the exception of
 special options noted below) are applied as arguments to the `git` command
@@ -64,8 +84,19 @@ Output is available as an array of lines, each chomped.
 
     @sha1s_and_titles = $git->rev_list({ all => 1, pretty => 'oneline' });
 
+### Passing stringify-able objects as arguments
+
+Objects may be passed in the place of scalars, assuming those objects overload
+stringification in such a way as to produce a useful value. However, relying
+on this stringification is discouraged and likely to be officially deprecated
+in a subsequent release. Instead, if you have an object that stringifies to a
+meaningful value (_e.g._, a [Path::Class](http://search.cpan.org/perldoc?Path::Class) object), you should stringify it
+yourself before passing it to `Git::Wrapper` methods.
+
+## Error handling
+
 If a git command exits nonzero, a `Git::Wrapper::Exception` object will be
-thrown.  It has three useful methods:
+thrown (via `die()`). These objects have three useful methods:
 
 - error
 
@@ -79,7 +110,9 @@ thrown.  It has three useful methods:
 
     the exit status
 
-The exception stringifies to the error message.
+These exception objects stringify to the error message.
+
+# METHODS
 
 ## new
 
@@ -114,7 +147,7 @@ you want ANSI color highlighting, you'll need to bypass via the RUN() method
     my @logs = $git->log;
 
 Instead of giving back an arrayref of lines, the `log` method returns a list
-of `Git::Wrapper::Log` objects.  They have four methods:
+of `Git::Wrapper::Log` objects. They have four methods:
 
 - id
 - author
@@ -175,8 +208,8 @@ There are four status groups, each of which may contain zero or more changes.
 - unknown : Untracked files
 - conflict : Merge conflicts
 
-Note that a single file can occur in more than one group.  Eg, a modified file
-that has been added to the index will appear in the 'indexed' list.  If it is
+Note that a single file can occur in more than one group. Eg, a modified file
+that has been added to the index will appear in the 'indexed' list. If it is
 subsequently further modified it will additionally appear in the 'changed'
 group.
 
@@ -184,12 +217,12 @@ A Git::Wrapper::Status object has three methods you can call:
 
     my $from = $status->from;
 
-The file path of the changed file, relative to the repo root.  For renames,
+The file path of the changed file, relative to the repo root. For renames,
 this is the original path.
 
     my $to = $status->to;
 
-Renames returns the new path/name for the path.  In all other cases returns
+Renames returns the new path/name for the path. In all other cases returns
 an empty string.
 
     my $mode = $status->mode;
@@ -282,9 +315,9 @@ with a successful command.
 
 On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
 Git-1.7.1-preview20100612 due to a bug involving the return value of a git
-command in cmd/git.cmd.  If you use the msysGit version distributed with
+command in cmd/git.cmd. If you use the msysGit version distributed with
 GitExtensions or an earlier version of msysGit, tests will fail during
-installation of this module.  You can get the latest version of msysGit on the
+installation of this module. You can get the latest version of msysGit on the
 Google Code project page: [http://code.google.com/p/msysgit/downloads](http://code.google.com/p/msysgit/downloads)
 
 # ENVIRONMENT VARIABLES

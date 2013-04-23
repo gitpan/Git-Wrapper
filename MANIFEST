@@ -18,5 +18,6 @@ t/author-err.t
 t/basic.t
 t/git_binary.t
 t/parse_args.t
+t/path_class.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t

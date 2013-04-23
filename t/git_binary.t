@@ -15,8 +15,10 @@ my $dir = tempdir(CLEANUP => 1);
                                 git_binary => 'echo' });
 
   my @got = $git->RUN('marco');
-  chomp(@got);
-  is_deeply(\@got, ['marco'], "Wrapper runs what ever binary we tell it to");
+  # apparently some versions of windows include extra bonus whitespace, so the
+  # simple way of testing this fails sometimes. so...
+  is( scalar @got , 1 , 'only get one line' );
+  like( $got[0] , qr/^marco\s*$/ , 'Wrapper runs what ever binary we tell it to' );
 }
 
 {

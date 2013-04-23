@@ -4,7 +4,7 @@ use warnings;
 
 package Git::Wrapper;
 {
-  $Git::Wrapper::VERSION = '0.028_96';
+  $Git::Wrapper::VERSION = '0.028_97';
 }
 #ABSTRACT: Wrap git(7) command-line interface
 
@@ -18,6 +18,7 @@ use File::pushd;
 use File::Temp;
 use IPC::Cmd        qw(can_run);
 use IPC::Open3      qw();
+use Scalar::Util    qw(blessed);
 use Sort::Versions;
 use Symbol;
 
@@ -38,11 +39,15 @@ sub new {
 
   if ( scalar @_ == 1 ) {
     my $arg = shift;
-    if ( ! ref $arg ) { $args = { dir => $arg } }
-    elsif ( ref $arg eq 'HASH' ) { $args = $arg }
+    if ( ref $arg eq 'HASH' ) { $args = $arg }
+    elsif ( blessed $arg )    { $args = { dir => "$arg" } }  # my objects, let me
+                                                             # show you them.
+    elsif ( ! ref $arg )      { $args = { dir =>  $arg  } }
+    else { die "Single arg must be hashref, scalar, or stringify-able object" }
   }
   else {
     my( $dir , %opts ) = @_;
+    $dir = "$dir" if blessed $dir; # we can stringify it for you wholesale
     $args = { dir => $dir , %opts }
   }
 
@@ -101,6 +106,9 @@ sub RUN {
 
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
 
+    # Prevent commands from running interactively
+    local $ENV{GIT_EDITOR} = '';
+
     my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
     print $wtr $stdin
       if defined $stdin;
@@ -115,7 +123,7 @@ sub RUN {
   print "status: $?\n" if $DEBUG;
 
   # In earlier gits (1.5, 1.6, I'm not sure when it changed), "git status"
-  # would exit 1 if there was nothing to commit, or in other cases.  This is
+  # would exit 1 if there was nothing to commit, or in other cases. This is
   # basically insane, and has been fixed, but if we don't require git 1.7, we
   # should cope with it. -- rjbs, 2012-03-31
   my $stupid_status = $cmd eq 'status' && @out && ! @err;
@@ -347,8 +355,12 @@ sub _parse_args {
         }
       }
     }
+    elsif ( blessed $_ ) {
+      push @post_cmd , "$_";      # here be anteaters
+    }
     elsif ( ref $_ ) {
-      die "Git::Wrapper command arguments must be plain scalars or hashrefs.\n";
+      die "Git::Wrapper command arguments must be plain scalars, hashrefs, "
+        . "or stringify-able objects.\n";
     }
     else { push @post_cmd , $_; }
   }
@@ -377,7 +389,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.028_96
+version 0.028_97
 
 =head1 SYNOPSIS
 
@@ -397,20 +409,40 @@ version 0.028_96
 Git::Wrapper provides an API for git(7) that uses Perl data structures for
 argument passing, instead of CLI-style C<--options> as L<Git> does.
 
-=head1 METHODS
+=head1 METHOD INVOCATION
 
 Except as documented, every git subcommand is available as a method on a
-Git::Wrapper object.  Replace any hyphens in the git command with underscores.
+Git::Wrapper object. Replace any hyphens in the git command with underscores
+(for example, 'git init-db' would become C<$git->init_db>).
 
-#FIXME write this to reflect new parsing strategy
+=head2 Method Arguments
 
-The first argument should be a hashref containing options and their values.
-Boolean options are either true (included) or false (excluded).  The remaining
-arguments are passed as ordinary command arguments.
+Methods accept a combination of hashrefs and scalars, which is used to build
+the command used to invoke git. Arguments passed in hashrefs will be
+automatically parsed into option pairs, but the ordering of these in the
+resulting shell command is not guarenteed (with the exceptino of options with
+a leading '-'; see below). Options that are passed as plain scalars will
+retain their order. Some examples may help clarify. This code:
 
-  $git->commit({ all => 1, message => "stuff" });
+  $git->commit({ message => "stuff" , all => 1 });
 
-  $git->checkout("mybranch");
+may produce this shell command:
+
+  git commit --all --message="stuff"
+
+This code, however:
+
+  $git->commit(qw/ --message "stuff" / , { all => 1 });
+
+will always produce this shell command:
+
+  git commit --message "stuff" --all
+
+In most cases, this exact control over argument ordering is not needed and
+simply passing all options as part of a hashref, and all other options as
+additional list arguments, will be sufficient. In some cases, however, the
+ordering of options to particular git sub-commands is significant, resulting
+in the need for this level of control.
 
 I<N.b.> Options that are given with a leading '-' (with the exception of
 special options noted below) are applied as arguments to the C<git> command
@@ -437,8 +469,19 @@ Output is available as an array of lines, each chomped.
 
   @sha1s_and_titles = $git->rev_list({ all => 1, pretty => 'oneline' });
 
+=head3 Passing stringify-able objects as arguments
+
+Objects may be passed in the place of scalars, assuming those objects overload
+stringification in such a way as to produce a useful value. However, relying
+on this stringification is discouraged and likely to be officially deprecated
+in a subsequent release. Instead, if you have an object that stringifies to a
+meaningful value (I<e.g.>, a L<Path::Class> object), you should stringify it
+yourself before passing it to C<Git::Wrapper> methods.
+
+=head2 Error handling
+
 If a git command exits nonzero, a C<Git::Wrapper::Exception> object will be
-thrown.  It has three useful methods:
+thrown (via C<die()>). These objects have three useful methods:
 
 =over
 
@@ -456,7 +499,9 @@ the exit status
 
 =back
 
-The exception stringifies to the error message.
+These exception objects stringify to the error message.
+
+=head1 METHODS
 
 =head2 new
 
@@ -491,7 +536,7 @@ you want ANSI color highlighting, you'll need to bypass via the RUN() method
   my @logs = $git->log;
 
 Instead of giving back an arrayref of lines, the C<log> method returns a list
-of C<Git::Wrapper::Log> objects.  They have four methods:
+of C<Git::Wrapper::Log> objects. They have four methods:
 
 =over
 
@@ -566,8 +611,8 @@ There are four status groups, each of which may contain zero or more changes.
 
 =back
 
-Note that a single file can occur in more than one group.  Eg, a modified file
-that has been added to the index will appear in the 'indexed' list.  If it is
+Note that a single file can occur in more than one group. Eg, a modified file
+that has been added to the index will appear in the 'indexed' list. If it is
 subsequently further modified it will additionally appear in the 'changed'
 group.
 
@@ -575,12 +620,12 @@ A Git::Wrapper::Status object has three methods you can call:
 
   my $from = $status->from;
 
-The file path of the changed file, relative to the repo root.  For renames,
+The file path of the changed file, relative to the repo root. For renames,
 this is the original path.
 
   my $to = $status->to;
 
-Renames returns the new path/name for the path.  In all other cases returns
+Renames returns the new path/name for the path. In all other cases returns
 an empty string.
 
   my $mode = $status->mode;
@@ -692,9 +737,9 @@ with a successful command.
 
 On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
 Git-1.7.1-preview20100612 due to a bug involving the return value of a git
-command in cmd/git.cmd.  If you use the msysGit version distributed with
+command in cmd/git.cmd. If you use the msysGit version distributed with
 GitExtensions or an earlier version of msysGit, tests will fail during
-installation of this module.  You can get the latest version of msysGit on the
+installation of this module. You can get the latest version of msysGit on the
 Google Code project page: L<http://code.google.com/p/msysgit/downloads>
 
 =head1 ENVIRONMENT VARIABLES
