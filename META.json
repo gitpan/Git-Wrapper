@@ -57,7 +57,7 @@
          }
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/genehack/Git-Wrapper/issues"
@@ -69,7 +69,7 @@
          "web" : "https://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.028_97",
+   "version" : "0.029",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.016003"

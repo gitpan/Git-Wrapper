@@ -39,7 +39,7 @@ resources:
   bugtracker: https://github.com/genehack/Git-Wrapper/issues
   homepage: http://genehack.github.com/Git-Wrapper/
   repository: git://github.com/genehack/Git-Wrapper.git
-version: 0.028_97
+version: 0.029
 x_Dist_Zilla:
   perl:
     version: 5.016003
