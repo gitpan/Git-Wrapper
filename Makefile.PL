@@ -24,6 +24,7 @@ my %WriteMakefileArgs = (
     "File::pushd" => 0,
     "IPC::Cmd" => 0,
     "IPC::Open3" => 0,
+    "Path::Class" => "0.26",
     "Scalar::Util" => 0,
     "Sort::Versions" => 0,
     "Symbol" => 0,
@@ -42,7 +43,7 @@ my %WriteMakefileArgs = (
     "Test::More" => 0,
     "Test::Most" => 0
   },
-  "VERSION" => "0.029",
+  "VERSION" => "0.030",
   "test" => {
     "TESTS" => "t/*.t"
   }
