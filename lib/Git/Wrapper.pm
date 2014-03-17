@@ -3,11 +3,8 @@ use strict;
 use warnings;
 
 package Git::Wrapper;
-{
-  $Git::Wrapper::VERSION = '0.030';
-}
 #ABSTRACT: Wrap git(7) command-line interface
-
+$Git::Wrapper::VERSION = '0.031';
 our $DEBUG=0;
 
 # Prevent ANSI color with extreme prejudice
@@ -16,7 +13,6 @@ delete $ENV{GIT_PAGER_IN_USE};
 
 use File::pushd;
 use File::Temp;
-use IPC::Cmd        qw(can_run);
 use IPC::Open3      qw();
 use Scalar::Util    qw(blessed);
 use Sort::Versions;
@@ -164,7 +160,10 @@ sub git {
   return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 }
 
-sub has_git_in_path { can_run('git') }
+sub has_git_in_path {
+  require IPC::Cmd;
+  IPC::Cmd::can_run('git');
+}
 
 sub log {
   my $self = shift;
@@ -383,13 +382,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Git::Wrapper - Wrap git(7) command-line interface
 
 =head1 VERSION
 
-version 0.030
+version 0.031
 
 =head1 SYNOPSIS
 
@@ -752,7 +753,7 @@ instead pass the binary location (git_binary) to new on object creation.
 =head1 SEE ALSO
 
 L<VCI::VCS::Git> is the git implementation for L<VCI>, a generic interface to
-version-controle systems.
+version-control systems.
 
 L<Other Perl Git Wrappers|https://metacpan.org/module/Git::Repository#OTHER-PERL-GIT-WRAPPERS>
 is a list of other Git interfaces in Perl. If L<Git::Wrapper> doesn't scratch

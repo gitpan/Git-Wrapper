@@ -5,204 +5,281 @@ author:
   - 'Chris Prather <chris@prather.org>'
   - 'John SJ Anderson <genehack@genehack.org>'
 build_requires:
-  Env::Path: 0
-  File::Path: 0
-  File::Spec: 0
-  IO::File: 0
-  POSIX: 0
-  Test::Deep: 0
-  Test::Exception: 0
-  Test::More: 0
-  Test::Most: 0
+  Env::Path: '0'
+  File::Path: '0'
+  File::Spec: '0'
+  IO::File: '0'
+  POSIX: '0'
+  Test::Deep: '0'
+  Test::Exception: '0'
+  Test::More: '0'
+  Test::Most: '0'
 configure_requires:
-  ExtUtils::MakeMaker: 6.30
+  ExtUtils::MakeMaker: '6.30'
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 5.013, CPAN::Meta::Converter version 2.140640'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: Git-Wrapper
 requires:
-  File::Temp: 0
-  File::pushd: 0
-  IPC::Cmd: 0
-  IPC::Open3: 0
-  Path::Class: 0.26
-  Scalar::Util: 0
-  Sort::Versions: 0
-  Symbol: 0
-  overload: 0
-  perl: 5.006
-  strict: 0
-  warnings: 0
+  File::Temp: '0'
+  File::pushd: '0'
+  IPC::Cmd: '0'
+  IPC::Open3: '0'
+  Scalar::Util: '0'
+  Sort::Versions: '0'
+  Symbol: '0'
+  overload: '0'
+  perl: '5.006'
+  strict: '0'
+  warnings: '0'
 resources:
   bugtracker: https://github.com/genehack/Git-Wrapper/issues
   homepage: http://genehack.github.com/Git-Wrapper/
   repository: git://github.com/genehack/Git-Wrapper.git
-version: 0.030
+version: '0.031'
 x_Dist_Zilla:
   perl:
-    version: 5.018000
+    version: '5.018001'
   plugins:
     -
       class: Dist::Zilla::Plugin::GatherDir
       name: GatherDir
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::PruneCruft
       name: '@Filter/PruneCruft'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::ManifestSkip
       name: '@Filter/ManifestSkip'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::MetaYAML
       name: '@Filter/MetaYAML'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::License
       name: '@Filter/License'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::ExtraTests
       name: '@Filter/ExtraTests'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::ExecDir
       name: '@Filter/ExecDir'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::ShareDir
       name: '@Filter/ShareDir'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::MakeMaker
       name: '@Filter/MakeMaker'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::Manifest
       name: '@Filter/Manifest'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::TestRelease
       name: '@Filter/TestRelease'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::ConfirmRelease
       name: '@Filter/ConfirmRelease'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Filter/UploadToCPAN'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::Git::NextVersion
       name: Git::NextVersion
-      version: 2.014
+      version: '2.020'
     -
       class: Dist::Zilla::Plugin::AutoPrereqs
       name: AutoPrereqs
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::Prereqs
       config:
         Dist::Zilla::Plugin::Prereqs:
-          phase: runtime
-          type: requires
-      name: Prereqs
-      version: 4.300035
+          phase: test
+          type: recommends
+      name: TestRecommends
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::GithubMeta
       name: GithubMeta
-      version: 0.28
+      version: '0.42'
     -
       class: Dist::Zilla::Plugin::InstallGuide
       name: InstallGuide
-      version: 1.200000
+      version: '1.200002'
     -
       class: Dist::Zilla::Plugin::MetaConfig
       name: MetaConfig
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::MetaJSON
       name: MetaJSON
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::NextRelease
       name: NextRelease
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::PkgVersion
       name: PkgVersion
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::PodSyntaxTests
       name: PodSyntaxTests
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::PodCoverageTests
       name: PodCoverageTests
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::PodWeaver
+      config:
+        Dist::Zilla::Plugin::PodWeaver:
+          finder:
+            - ':InstallModules'
+            - ':ExecFiles'
+          plugins:
+            -
+              class: Pod::Weaver::Plugin::EnsurePod5
+              name: '@CorePrep/EnsurePod5'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Plugin::H1Nester
+              name: '@CorePrep/H1Nester'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Plugin::SingleEncoding
+              name: '@Default/SingleEncoding'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Name
+              name: '@Default/Name'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Version
+              name: '@Default/Version'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Region
+              name: '@Default/prelude'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Generic
+              name: SYNOPSIS
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Generic
+              name: DESCRIPTION
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Generic
+              name: OVERVIEW
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Collect
+              name: ATTRIBUTES
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Collect
+              name: METHODS
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Collect
+              name: FUNCTIONS
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Leftovers
+              name: '@Default/Leftovers'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Region
+              name: '@Default/postlude'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Authors
+              name: '@Default/Authors'
+              version: '4.006'
+            -
+              class: Pod::Weaver::Section::Legal
+              name: '@Default/Legal'
+              version: '4.006'
       name: PodWeaver
-      version: 3.101641
+      version: '4.005'
     -
       class: Dist::Zilla::Plugin::ReadmeMarkdownFromPod
       name: ReadmeMarkdownFromPod
-      version: 0.120120
+      version: '0.120120'
     -
       class: Dist::Zilla::Plugin::CopyFilesFromBuild
       name: CopyFilesFromBuild
-      version: 0.103510
+      version: '0.103510'
     -
       class: Dist::Zilla::Plugin::Repository
       name: Repository
-      version: 0.19
+      version: '0.20'
     -
       class: Dist::Zilla::Plugin::Git::Commit
       name: Git::Commit
-      version: 2.014
+      version: '2.020'
     -
       class: Dist::Zilla::Plugin::Git::Tag
       name: Git::Tag
-      version: 2.014
+      version: '2.020'
     -
       class: Dist::Zilla::Plugin::Twitter
       name: Twitter
-      version: 0.021
+      version: '0.025'
     -
       class: Dist::Zilla::Plugin::RequiresExternal
       name: RequiresExternal
-      version: 1.004
+      version: '1.004'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':InstallModules'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':IncModules'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':TestFiles'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ExecFiles'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ShareFiles'
-      version: 4.300035
+      version: '5.013'
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':MainModule'
-      version: 4.300035
+      version: '5.013'
+    -
+      class: Dist::Zilla::Plugin::FinderCode
+      name: ':AllFiles'
+      version: '5.013'
+    -
+      class: Dist::Zilla::Plugin::FinderCode
+      name: ':NoFiles'
+      version: '5.013'
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
-      is_trial: 0
-    version: 4.300035
+      is_trial: '0'
+    version: '5.013'

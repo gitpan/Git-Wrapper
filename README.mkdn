@@ -4,7 +4,7 @@ Git::Wrapper - Wrap git(7) command-line interface
 
 # VERSION
 
-version 0.030
+version 0.031
 
 # SYNOPSIS
 
@@ -22,7 +22,7 @@ version 0.030
 # DESCRIPTION
 
 Git::Wrapper provides an API for git(7) that uses Perl data structures for
-argument passing, instead of CLI-style `--options` as [Git](http://search.cpan.org/perldoc?Git) does.
+argument passing, instead of CLI-style `--options` as [Git](https://metacpan.org/pod/Git) does.
 
 # METHOD INVOCATION
 
@@ -90,7 +90,7 @@ Objects may be passed in the place of scalars, assuming those objects overload
 stringification in such a way as to produce a useful value. However, relying
 on this stringification is discouraged and likely to be officially deprecated
 in a subsequent release. Instead, if you have an object that stringifies to a
-meaningful value (_e.g._, a [Path::Class](http://search.cpan.org/perldoc?Path::Class) object), you should stringify it
+meaningful value (_e.g._, a [Path::Class](https://metacpan.org/pod/Path::Class) object), you should stringify it
 yourself before passing it to `Git::Wrapper` methods.
 
 ## Error handling
@@ -179,11 +179,11 @@ versions of the underlying git binary.
 ## status
 
 When running with an underlying git binary that returns false for the
-["supports\_status\_porcelain"](#supports\_status\_porcelain) method, this method will act like any other
+["supports\_status\_porcelain"](#supports_status_porcelain) method, this method will act like any other
 wrapped command: it will return output as an array of chomped lines.
 
 When running with an underlying git binary that returns true for the
-["supports\_status\_porcelain"](#supports\_status\_porcelain) method, this method instead returns an
+["supports\_status\_porcelain"](#supports_status_porcelain) method, this method instead returns an
 instance of Git::Wrapper::Statuses:
 
     my $statuses = $git->status;
@@ -329,11 +329,11 @@ instead pass the binary location (git\_binary) to new on object creation.
 
 # SEE ALSO
 
-[VCI::VCS::Git](http://search.cpan.org/perldoc?VCI::VCS::Git) is the git implementation for [VCI](http://search.cpan.org/perldoc?VCI), a generic interface to
-version-controle systems.
+[VCI::VCS::Git](https://metacpan.org/pod/VCI::VCS::Git) is the git implementation for [VCI](https://metacpan.org/pod/VCI), a generic interface to
+version-control systems.
 
-[Other Perl Git Wrappers](https://metacpan.org/module/Git::Repository\#OTHER-PERL-GIT-WRAPPERS)
-is a list of other Git interfaces in Perl. If [Git::Wrapper](http://search.cpan.org/perldoc?Git::Wrapper) doesn't scratch
+[Other Perl Git Wrappers](https://metacpan.org/module/Git::Repository#OTHER-PERL-GIT-WRAPPERS)
+is a list of other Git interfaces in Perl. If [Git::Wrapper](https://metacpan.org/pod/Git::Wrapper) doesn't scratch
 your itch, possibly one of the modules listed there will.
 
 Git itself is at [http://git.or.cz](http://git.or.cz).
