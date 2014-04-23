@@ -1,6 +1,6 @@
 package Git::Wrapper::Statuses;
 # ABSTRACT: Multiple git statuses information
-$Git::Wrapper::Statuses::VERSION = '0.031';
+$Git::Wrapper::Statuses::VERSION = '0.032';
 use 5.006;
 use strict;
 use warnings;
@@ -43,7 +43,7 @@ Git::Wrapper::Statuses - Multiple git statuses information
 
 =head1 VERSION
 
-version 0.031
+version 0.032
 
 =head1 METHODS
 
@@ -88,7 +88,7 @@ John SJ Anderson <genehack@genehack.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2008 by Hans Dieter Pearcey.
+This software is copyright (c) 2014 by Hans Dieter Pearcey.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

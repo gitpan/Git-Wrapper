@@ -298,7 +298,7 @@ values, and then a list of any other arguments.
 
 After a command has been run, this method will return anything that was sent
 to `STDERR`, in the form of an array of chomped lines. This information will
-be cleared as soon as a new command is executed. This method should **\*NOT\***
+be cleared as soon as a new command is executed. This method should __\*NOT\*__
 be used as a success/failure check, as `git` will sometimes produce output on
 STDERR when a command is successful.
 
@@ -307,7 +307,7 @@ STDERR when a command is successful.
 After a command has been run, this method will return anything that was sent
 to `STDOUT`, in the form of an array of chomped lines. It is identical to
 what is returned from the method call that runs the command, and is provided
-simply for symmetry with the `ERR` method. This method should **\*NOT\*** be
+simply for symmetry with the `ERR` method. This method should __\*NOT\*__ be
 used as a success/failure check, as `git` will frequently not have any output
 with a successful command.
 
