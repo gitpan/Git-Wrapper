@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.033     2014-07-24 14:45:05-07:00 America/Los_Angeles
+
+        require File::pushd 1.05 at a minimum
+
 0.032     2014-04-22 18:29:06-07:00 America/Los_Angeles
 
         bail out early in Makefile.PL if git not installed, instead of
