@@ -25,7 +25,7 @@ my %WriteMakefileArgs = (
   "NAME" => "Git::Wrapper",
   "PREREQ_PM" => {
     "File::Temp" => 0,
-    "File::pushd" => "1.05",
+    "File::pushd" => "1.005",
     "IPC::Cmd" => 0,
     "IPC::Open3" => 0,
     "Scalar::Util" => 0,
@@ -44,7 +44,7 @@ my %WriteMakefileArgs = (
     "Test::Exception" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.033",
+  "VERSION" => "0.034",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -55,7 +55,7 @@ my %FallbackPrereqs = (
   "File::Path" => 0,
   "File::Spec" => 0,
   "File::Temp" => 0,
-  "File::pushd" => "1.05",
+  "File::pushd" => "1.005",
   "IO::File" => 0,
   "IPC::Cmd" => 0,
   "IPC::Open3" => 0,

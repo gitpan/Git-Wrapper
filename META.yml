@@ -24,7 +24,7 @@ meta-spec:
 name: Git-Wrapper
 requires:
   File::Temp: '0'
-  File::pushd: '1.05'
+  File::pushd: '1.005'
   IPC::Cmd: '0'
   IPC::Open3: '0'
   Scalar::Util: '0'
@@ -38,7 +38,7 @@ resources:
   bugtracker: https://github.com/genehack/Git-Wrapper/issues
   homepage: http://genehack.github.com/Git-Wrapper/
   repository: https://github.com/genehack/Git-Wrapper.git
-version: '0.033'
+version: '0.034'
 x_Dist_Zilla:
   perl:
     version: '5.020000'
@@ -253,7 +253,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v0.033
+          tag: v0.034
           tag_format: v%v
           tag_message: v%v
           time_zone: local
