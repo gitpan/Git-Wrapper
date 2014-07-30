@@ -1,5 +1,7 @@
 Revision history for Git-Wrapper
 
+0.035     2014-07-30 07:25:21-07:00 America/Los_Angeles
+
 0.034     2014-07-24 18:30:14-07:00 America/Los_Angeles
 
         Fix typo in minimum version required of File::pushd (Russell
