@@ -15,6 +15,7 @@ build_requires:
 configure_requires:
   Devel::CheckBin: '0'
   ExtUtils::MakeMaker: '6.30'
+  File::Spec: '0'
 dynamic_config: 0
 generated_by: 'Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.141520'
 license: perl
@@ -38,7 +39,7 @@ resources:
   bugtracker: https://github.com/genehack/Git-Wrapper/issues
   homepage: http://genehack.github.com/Git-Wrapper/
   repository: https://github.com/genehack/Git-Wrapper.git
-version: '0.035'
+version: '0.036'
 x_Dist_Zilla:
   perl:
     version: '5.020000'
@@ -76,13 +77,6 @@ x_Dist_Zilla:
       name: '@Filter/ShareDir'
       version: '5.019'
     -
-      class: Dist::Zilla::Plugin::MakeMaker
-      config:
-        Dist::Zilla::Role::TestRunner:
-          default_jobs: 1
-      name: '@Filter/MakeMaker'
-      version: '5.019'
-    -
       class: Dist::Zilla::Plugin::Manifest
       name: '@Filter/Manifest'
       version: '5.019'
@@ -98,6 +92,13 @@ x_Dist_Zilla:
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Filter/UploadToCPAN'
       version: '5.019'
+    -
+      class: inc::CheckGitConfig
+      config:
+        Dist::Zilla::Role::TestRunner:
+          default_jobs: 1
+      name: =inc::CheckGitConfig
+      version: ~
     -
       class: Dist::Zilla::Plugin::Git::NextVersion
       config:
@@ -253,7 +254,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v0.035
+          tag: v0.036
           tag_format: v%v
           tag_message: v%v
           time_zone: local

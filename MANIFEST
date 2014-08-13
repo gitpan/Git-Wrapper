@@ -8,6 +8,7 @@ META.yml
 Makefile.PL
 README.md
 README.mkdn
+inc/CheckGitConfig.pm
 lib/Git/Wrapper.pm
 lib/Git/Wrapper/Exception.pm
 lib/Git/Wrapper/File/RawModification.pm
