@@ -72,7 +72,7 @@
          "web" : "https://github.com/genehack/Git-Wrapper"
       }
    },
-   "version" : "0.036",
+   "version" : "0.037",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.020000"
@@ -346,7 +346,7 @@
                "Dist::Zilla::Plugin::Git::Tag" : {
                   "branch" : null,
                   "signed" : 0,
-                  "tag" : "v0.036",
+                  "tag" : "v0.037",
                   "tag_format" : "v%v",
                   "tag_message" : "v%v",
                   "time_zone" : "local"

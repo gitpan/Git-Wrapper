@@ -12,7 +12,7 @@ around _build_MakeFile_PL_template => sub {
 my $git_check = <<GIT_CHECK;
 require File::Spec;
 die 'git seems broken; maybe check your HOME environment variable?'
-    if system('git config --global --list >'.File::Spec->devnull);
+    if system('git config --list >'.File::Spec->devnull);
 
 GIT_CHECK
 

@@ -11,7 +11,7 @@ use warnings;
 
 require File::Spec;
 die 'git seems broken; maybe check your HOME environment variable?'
-    if system('git config --global --list >'.File::Spec->devnull);
+    if system('git config --list >'.File::Spec->devnull);
 
 use 5.006;
 
@@ -52,7 +52,7 @@ my %WriteMakefileArgs = (
     "Test::Exception" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.036",
+  "VERSION" => "0.037",
   "test" => {
     "TESTS" => "t/*.t"
   }
