@@ -1,6 +1,10 @@
 Revision history for Git-Wrapper
 
+0.038     2014-10-29 10:35:40-07:00 America/Los_Angeles
+
 0.037     2014-08-13 12:43:00-05:00 America/Chicago
+
+        Fix 'git config' during install stuff (Graham Knop)
 
 0.036     2014-08-12 23:50:30-05:00 America/Chicago
 
